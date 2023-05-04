@@ -10,7 +10,7 @@ class WebPageType(DjangoObjectType):
 
     class Meta:
         model = WebsiteRecord
-        fields = ("label", "url", "tags", "active", "periodicity")
+        fields = ("label", "url", "tags", "active")
 
 
 class NodeType(DjangoObjectType):
