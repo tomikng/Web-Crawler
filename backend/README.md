@@ -1,3 +1,8 @@
+# System requirements
+- Python 3.8 or newer
+- optional - Virtual enviroment
+  
+
 # Instrukce na spusteni
 - Virtual enviroment
     - Libovolny - venv, anakonda
@@ -8,6 +13,11 @@ pip install -r requirements.txt
 - Poznamka
   - Na graphql + django pouzijeme knihovnu Graphene-Django 
   - Nastudovat si dokumentaci
+  
+- Spustit backend
+```commandline
+python manage.py runserver
+```
   
 # TODO
 - **site_management**: Tato aplikace by mohla řídit CRUD operace pro záznamy webu, stejně jako filtrování, 

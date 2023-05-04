@@ -1,22 +1,30 @@
 import graphene
 from graphene_django import DjangoObjectType
-from api.models import WebsiteRecord, CrawledPage
+from .models import WebsiteRecord, CrawledPage
 
 
-class WebsiteRecordType(DjangoObjectType):
+class WebPageType(DjangoObjectType):
+    identifier = graphene.ID(source='pk')
+    regexp = graphene.String(source='boundary_regexp')
+
     class Meta:
         model = WebsiteRecord
-        fields = "__all__"
+        fields = ("label", "url", "tags", "active")
 
 
 class NodeType(DjangoObjectType):
     class Meta:
         model = CrawledPage
-        fields = "__all__"
+        fields = ("title", "url", "crawl_time", "links")
+
+    owner = graphene.Field(WebPageType)
+
+    def resolve_owner(self, info):
+        return self.execution.website_record
 
 
 class Query(graphene.ObjectType):
-    websites = graphene.List(WebsiteRecordType)
+    websites = graphene.List(WebPageType)
     nodes = graphene.List(NodeType, web_pages=graphene.List(graphene.ID))
 
     def resolve_websites(root, info):
@@ -24,7 +32,7 @@ class Query(graphene.ObjectType):
 
     def resolve_nodes(root, info, web_pages=None):
         if web_pages:
-            return CrawledPage.objects.filter(owner__in=web_pages)
+            return CrawledPage.objects.filter(execution__website_record__in=web_pages)
         return CrawledPage.objects.all()
 
 
