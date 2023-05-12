@@ -1,6 +1,7 @@
 # System requirements
 - Python 3.8 or newer
 - optional - Virtual enviroment
+- Docker
   
 
 # Instrukce na spusteni
@@ -18,6 +19,18 @@ pip install -r requirements.txt
 ```commandline
 python manage.py runserver
 ```
+
+Spustit celery (mit nainstalovanu rabbitMQ)
+```commandline
+celery -A backend worker --loglevel=info
+```
+
+
+Pak lepsi hodit do dockeru. 
+Zatim nefunguje, nevim proc
+```commandline
+docker-compose up --build
+```
   
 # TODO
 - **site_management**: Tato aplikace by mohla řídit CRUD operace pro záznamy webu, stejně jako filtrování, 
@@ -33,3 +46,4 @@ python manage.py runserver
   crawleru a za zpracování případných souvisejících interaktivních prvků.
 
 - **api**: Tato aplikace by mohla řídit raphQL endpointy pro projekt. **(TOMAS)**
+  - OpenAPI dokumentace

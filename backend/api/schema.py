@@ -44,14 +44,13 @@ class CreateWebsiteRecordMutation(graphene.Mutation):
         regexp = graphene.String(required=True)
         tags = graphene.List(graphene.String)
         active = graphene.Boolean(required=True)
-        periodicity = graphene.String(required=True)
 
     success = graphene.Boolean()
     website_record = graphene.Field(lambda: WebPageType)
 
-    def mutate(root, info, label, url, regexp, tags, active, periodicity):
+    def mutate(root, info, label, url, regexp, tags, active):
         website_record = WebsiteRecord(label=label, url=url, boundary_regexp=regexp, tags=','.join(tags), active=active,
-                                       periodicity=periodicity)
+                                       )
         website_record.save()
         return CreateWebsiteRecordMutation(success=True, website_record=website_record)
 

@@ -40,9 +40,11 @@ INSTALLED_APPS = [
 
     # Nase apps
     "api",
+    "webcrawler",
     
     # Ostatni knihovny
     "graphene_django",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -133,3 +135,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 GRAPHENE = {
     'SCHEMA': 'api.schema.schema'
 }
+
+# Celery
+
+CELERY_IMPORTS = ("webcrawler.tasks",)
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+
+

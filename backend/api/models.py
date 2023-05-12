@@ -3,6 +3,8 @@ import re
 
 
 class WebsiteRecord(models.Model):
+    id = models.AutoField(primary_key=True)
+
     url = models.URLField()
     boundary_regexp = models.CharField(max_length=256)
     PERIODICITY_CHOICES = [
@@ -20,6 +22,8 @@ class WebsiteRecord(models.Model):
 
 
 class Execution(models.Model):
+    id = models.AutoField(primary_key=True)
+
     website_record = models.ForeignKey(WebsiteRecord, on_delete=models.CASCADE)
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -37,11 +41,21 @@ class Execution(models.Model):
 
 
 class CrawledPage(models.Model):
+    id = models.AutoField(primary_key=True)
+
     execution = models.ForeignKey(Execution, on_delete=models.CASCADE)
     url = models.URLField()
     crawl_time = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200, null=True, blank=True)
-    links = models.ManyToManyField('self', symmetrical=False, blank=True)
+    links = models.TextField(null=True, blank=True)
+
+    def set_links(self, links):
+        self.links = ','.join(links)
+
+    def get_links(self):
+        if self.links:
+            return self.links.split(',')
+        return []
 
     def __str__(self):
         return self.url

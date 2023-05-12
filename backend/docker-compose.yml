@@ -1,0 +1,21 @@
+version: "3.10"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+    command: python manage.py runserver
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  celery:
+    build: .
+    depends_on:
+      - rabbitmq
+    command: celery -A backend worker --loglevel=info
