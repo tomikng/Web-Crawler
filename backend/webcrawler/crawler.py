@@ -14,6 +14,7 @@ class Crawler:
     def __init__(self, website_record):
         self.website_record = website_record
         self.visited_urls = set()
+        self.num_crawled = 0
 
     def crawl(self, start_url):
         queue = deque([start_url])
@@ -31,16 +32,18 @@ class Crawler:
                 future = executor.submit(self.process_url, url, execution)
                 links = future.result()
 
+                self.num_crawled += len(links)
+
                 self.enqueue_valid_links(links, queue)
 
     def create_execution(self):
-        execution = Execution.objects.create(
-            website_record=self.website_record,
-            status='pending',
-            start_time=datetime.now(),
-            end_time=None,
-            num_sites_crawled=0
-        )
+        execution = Execution.objects.get(website_record=self.website_record)
+
+        execution.status = 'pending'
+        execution.start_time = datetime.now()
+        execution.end_time = None
+        execution.num_sites_crawled = 0
+
         return execution
 
     def process_url(self, url, execution):

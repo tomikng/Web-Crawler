@@ -15,7 +15,7 @@ def crawl_website(website_record_label):
     # Update the Execution model with status and other required information
     execution.status = "completed"
     execution.end_time = timezone.now()
-    execution.num_sites_crawled = len(crawler.pages)
+    execution.num_sites_crawled = crawler.num_crawled
     execution.save()
 
     return execution.pk

@@ -16,5 +16,9 @@ COPY . .
 # Expose the port on which your Django application will run
 #EXPOSE 8000
 
+# Migrate
+#CMD ["python", "manage.py", "makemigrations"]
+#CMD ["python", "manage.py", "migrate"]
+
 # Set the entrypoint command for the container
 CMD ["python", "manage.py", "runserver"]
