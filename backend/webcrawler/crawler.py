@@ -19,6 +19,7 @@ class Crawler:
     def crawl(self, start_url):
         queue = deque([start_url])
         execution = self.get_execution()
+        execution.save()
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             while queue:
@@ -37,7 +38,7 @@ class Crawler:
     def get_execution(self):
         execution = Execution.objects.get(website_record=self.website_record)
 
-        execution.status = 'pending'
+        execution.status = 'running'
         execution.start_time = datetime.now()
         execution.end_time = None
         execution.num_sites_crawled = 0

@@ -9,23 +9,39 @@ from .crawler import Crawler
 @shared_task
 def crawl_website(website_record_label):
     website_record = WebsiteRecord.objects.get(label=website_record_label)
-    crawler = Crawler(website_record)
-    execution, created = Execution.objects.get_or_create(
-        website_record=website_record,
-        defaults={
-            'status': 'pending',
-            'start_time': datetime.now(),
-            'end_time': None,
-            'num_sites_crawled': 0
-        }
-    )
+    try:
+        crawler = Crawler(website_record)
+        execution, created = Execution.objects.get_or_create(
+            website_record=website_record,
+            defaults={
+                'status': 'pending',
+                'start_time': timezone.now(),
+                'end_time': None,
+                'num_sites_crawled': 0
+            }
+        )
+        execution.status = 'pending'
+        execution.save()
 
-    crawler.crawl(website_record.url)
+        crawler.crawl(website_record.url)
+        # crawler.crawl.delay(website_record.url)
 
-    # Update the Execution model with status and other required information
-    execution.status = "completed"
-    execution.end_time = timezone.now()
-    execution.num_sites_crawled = crawler.num_crawled
-    execution.save()
+        # Update the Execution model with status and other required information
+        execution.status = "completed"
+        execution.end_time = timezone.now()
+        execution.num_sites_crawled = crawler.num_crawled
+        execution.save()
+
+    except Exception as e:
+        # An error occurred during crawling
+        execution = Execution.objects.get_or_create(
+            website_record=website_record,
+            status="failed",
+            start_time=timezone.now(),
+            end_time=timezone.now(),
+            num_sites_crawled=0
+        )
+        execution.save()
+        raise e
 
     return execution.pk
