@@ -32,7 +32,7 @@ class Crawler:
                 future = executor.submit(self.process_url, url, execution)
                 links = future.result()
 
-                self.num_crawled += len(links)
+                # self.num_crawled += len(links)
 
                 self.enqueue_valid_links(links, queue)
 
@@ -95,6 +95,7 @@ class Crawler:
     def enqueue_valid_links(self, links, queue):
         for link in links:
             if self.is_valid_link(link):
+                self.num_crawled += 1
                 queue.append(link)
 
     def is_valid_link(self, link):
