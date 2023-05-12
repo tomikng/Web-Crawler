@@ -46,7 +46,6 @@ class Execution(models.Model):
 class CrawledPage(models.Model):
     id = models.AutoField(primary_key=True)
 
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     execution = models.ForeignKey(Execution, on_delete=models.CASCADE)
     url = models.URLField(unique=True)
     crawl_time = models.DateTimeField(auto_now_add=True)

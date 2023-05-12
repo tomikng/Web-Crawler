@@ -34,13 +34,16 @@ def crawl_website(website_record_label):
 
     except Exception as e:
         # An error occurred during crawling
-        execution = Execution.objects.get_or_create(
+        execution, created = Execution.objects.get_or_create(
             website_record=website_record,
-            status="failed",
-            start_time=timezone.now(),
-            end_time=timezone.now(),
-            num_sites_crawled=0
+            defaults={
+                'status': 'failed',
+                'start_time': timezone.now(),
+                'end_time': None,
+                'num_sites_crawled': 0
+            }
         )
+        execution.status = "failed"
         execution.save()
         raise e
 
