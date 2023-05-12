@@ -15,6 +15,18 @@ pip install -r requirements.txt
   - Na graphql + django pouzijeme knihovnu Graphene-Django 
   - Nastudovat si dokumentaci
   
+- Create
+  
+```commandline
+python manage.py createsuperuser
+```
+
+- Migrate
+```commandline
+python manage.py makemigrations
+python manage.py migrate
+```
+  
 - Spustit backend
 ```commandline
 python manage.py runserver
