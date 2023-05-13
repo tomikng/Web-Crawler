@@ -33,11 +33,21 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Spustit celery (mit zapnuty redis pomoci WSL `sudo service redis-server start`)
+- Flower
+- Zmenit v asyncio .venv/Lib/site-packages/tornado/platform/asyncio.py
+- ``` python 
+  if sys.platform == 'win32':
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())```
 ```commandline
-celery -A backend worker --loglevel=info
+celery -A backend flower --port=5555
 ```
 
+Spustit celery (mit zapnuty redis pomoci WSL `sudo service redis-server start`)
+```commandline
+celery -A backend worker -l info --pool=solo
+celery -A backend beat -l INFO --scheduler django_celery_beat.schedulers.DatabaseScheduler
+```
+- 
 
 Pak lepsi hodit do dockeru. 
 Zatim nefunguje, nevim proc

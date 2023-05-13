@@ -4,6 +4,8 @@ import re
 
 from django.utils.datetime_safe import datetime
 
+from webcrawler.tasks_helper import create_periodic_crawl_task
+
 
 class WebsiteRecord(models.Model):
     id = models.AutoField(primary_key=True)
@@ -22,6 +24,10 @@ class WebsiteRecord(models.Model):
 
     def __str__(self):
         return self.label
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        create_periodic_crawl_task(self)
 
 
 class Execution(models.Model):

@@ -138,8 +138,7 @@ GRAPHENE = {
 
 # Celery
 
-CELERY_IMPORTS = ("webcrawler.tasks",)
 
-CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
 
 
