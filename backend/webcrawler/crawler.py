@@ -49,7 +49,7 @@ class Crawler:
     def process_url(self, url, execution):
         response = self.get_response(url)
         html = response.text
-        links = self.get_valid_links(self.extract_links(url, html))
+        links = self.extract_links(url, html)
         self.num_crawled += 1
 
         crawled_page = self.save_crawled_page(url, response, html, execution, links)
@@ -107,10 +107,3 @@ class Crawler:
     def is_valid_link(self, link):
         boundary_regexp = self.website_record.boundary_regexp
         return re.match(boundary_regexp, link) is not None
-
-    def get_valid_links(self, links):
-        result = set()
-        for url in links:
-            if self.is_valid_link(url):
-                result.add(url)
-        return result
