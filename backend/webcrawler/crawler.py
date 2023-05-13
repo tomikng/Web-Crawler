@@ -48,7 +48,7 @@ class Crawler:
     def process_url(self, url, execution):
         response = self.get_response(url)
         html = response.text
-        links = self.extract_links(url, html)
+        links = self.get_valid_links(self.extract_links(url, html))
 
         crawled_page = self.save_crawled_page(url, response, html, execution, links)
 
@@ -65,7 +65,7 @@ class Crawler:
             link = a_tag['href']
             absolute_link = urljoin(url, link)
             normalized_link = self.normalize_link(absolute_link)
-            if normalized_link:
+            if normalized_link and self.is_valid_link(normalized_link):  # Check if the link is valid
                 links.add(normalized_link)
         return links
 
@@ -76,14 +76,21 @@ class Crawler:
         return None
 
     def save_crawled_page(self, url, response, html, execution, links):
-        crawled_page = CrawledPage.objects.create(
+        crawl_time = datetime.now()
+        title = self.extract_title(html)
+
+        crawled_page, created = CrawledPage.objects.update_or_create(
             url=url,
-            crawl_time=response.elapsed.total_seconds(),
-            title=self.extract_title(html),
             execution=execution,
+            defaults={
+                'crawl_time': crawl_time,
+                'title': title,
+            }
         )
-        crawled_page.set_links(links)
+
+        crawled_page.set_links(links, execution=execution)
         crawled_page.save()
+
         return crawled_page
 
     def extract_title(self, html):
@@ -93,10 +100,16 @@ class Crawler:
 
     def enqueue_valid_links(self, links, queue):
         for link in links:
-            if self.is_valid_link(link):
-                self.num_crawled += 1
-                queue.append(link)
+            self.num_crawled += 1
+            queue.append(link)
 
     def is_valid_link(self, link):
         boundary_regexp = self.website_record.boundary_regexp
         return re.match(boundary_regexp, link) is not None
+
+    def get_valid_links(self, links):
+        result = set()
+        for url in links:
+            if self.is_valid_link(url):
+                result.add(url)
+        return result

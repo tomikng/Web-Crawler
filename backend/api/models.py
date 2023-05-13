@@ -1,6 +1,8 @@
 from django.db import models
 import re
 
+from django.utils.datetime_safe import datetime
+
 
 class WebsiteRecord(models.Model):
     id = models.AutoField(primary_key=True)
@@ -50,16 +52,22 @@ class CrawledPage(models.Model):
     url = models.URLField(unique=True)
     crawl_time = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200, null=True, blank=True)
-    links = models.TextField(null=True, blank=True)
+    links = models.ManyToManyField('self', blank=True)
 
-    def set_links(self, links):
-        self.links = ','.join(links)
+    def set_links(self, links, execution):
+        for url in links:
+            defaults = {'execution': execution,
+                        'crawl_time': datetime.now()}
+            crawled_page, created = CrawledPage.objects.update_or_create(url=url, defaults=defaults)
+            self.links.add(crawled_page)
 
     def get_links(self):
-        if self.links:
-            return self.links.split(',')
-        return []
+        return self.links.all()
 
     def __str__(self):
         return self.url
+
+
+
+
 
