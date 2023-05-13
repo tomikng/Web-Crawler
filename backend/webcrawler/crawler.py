@@ -49,6 +49,7 @@ class Crawler:
         response = self.get_response(url)
         html = response.text
         links = self.get_valid_links(self.extract_links(url, html))
+        self.num_crawled += 1
 
         crawled_page = self.save_crawled_page(url, response, html, execution, links)
 
@@ -100,7 +101,6 @@ class Crawler:
 
     def enqueue_valid_links(self, links, queue):
         for link in links:
-            self.num_crawled += 1
             queue.append(link)
 
     def is_valid_link(self, link):
