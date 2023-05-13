@@ -2,7 +2,7 @@
 - Python 3.8 or newer
 - optional - Virtual enviroment
 - Docker
-- Redis
+- [Redis](https://redis.io/docs/getting-started/installation/install-redis-on-windows/)
   
 
 # Instrukce na spusteni
