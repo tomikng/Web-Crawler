@@ -138,7 +138,6 @@ GRAPHENE = {
 
 # Celery
 
-CELERY_IMPORTS = ("webcrawler.tasks",)
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
 
