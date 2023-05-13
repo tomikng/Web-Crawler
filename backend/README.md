@@ -2,6 +2,7 @@
 - Python 3.8 or newer
 - optional - Virtual enviroment
 - Docker
+- Redis
   
 
 # Instrukce na spusteni
@@ -32,7 +33,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Spustit celery (mit nainstalovanu rabbitMQ)
+Spustit celery (mit nainstalovanu REDIS)
 ```commandline
 celery -A backend worker --loglevel=info
 ```
