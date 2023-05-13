@@ -18,7 +18,7 @@ def crawl_website(website_record_label):
     except Exception as e:
         handle_crawl_error(website_record, execution)
         raise e
-    return execution.pk
+    return website_record_label
 
 
 def create_or_get_execution(website_record):
