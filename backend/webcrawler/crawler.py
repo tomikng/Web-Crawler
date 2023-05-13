@@ -6,6 +6,7 @@ from collections import deque
 import concurrent.futures
 
 from django.utils.datetime_safe import datetime
+from django.utils.timezone import make_aware
 
 from api.models import CrawledPage, Execution
 
@@ -39,7 +40,7 @@ class Crawler:
         execution = Execution.objects.get(website_record=self.website_record)
 
         execution.status = 'running'
-        execution.start_time = datetime.now()
+        execution.start_time = make_aware(datetime.now())
         execution.end_time = None
         execution.num_sites_crawled = 0
 
@@ -84,7 +85,7 @@ class Crawler:
             url=url,
             execution=execution,
             defaults={
-                'crawl_time': crawl_time,
+                'crawl_time': make_aware(crawl_time),
                 'title': title,
             }
         )

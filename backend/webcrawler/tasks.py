@@ -1,6 +1,7 @@
 from celery import shared_task
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
+from django.utils.timezone import make_aware
 
 from api.models import WebsiteRecord, Execution, CrawledPage
 from .crawler import Crawler
@@ -15,7 +16,7 @@ def crawl_website(website_record_label):
             website_record=website_record,
             defaults={
                 'status': 'pending',
-                'start_time': timezone.now(),
+                'start_time': make_aware(datetime.now()),
                 'end_time': None,
                 'num_sites_crawled': 0
             }
@@ -38,7 +39,7 @@ def crawl_website(website_record_label):
             website_record=website_record,
             defaults={
                 'status': 'failed',
-                'start_time': timezone.now(),
+                'start_time': make_aware(datetime.now()),
                 'end_time': None,
                 'num_sites_crawled': 0
             }

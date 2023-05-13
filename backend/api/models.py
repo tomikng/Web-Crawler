@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import make_aware
 import re
 
 from django.utils.datetime_safe import datetime
@@ -57,7 +58,7 @@ class CrawledPage(models.Model):
     def set_links(self, links, execution):
         for url in links:
             defaults = {'execution': execution,
-                        'crawl_time': datetime.now()}
+                        'crawl_time': make_aware(datetime.now())}
             crawled_page, created = CrawledPage.objects.update_or_create(url=url, defaults=defaults)
             self.links.add(crawled_page)
 
