@@ -6,7 +6,16 @@
   
 
 # Instrukce na spusteni
-## Bez dockeru
+## Docker
+```commandline
+docker compose up --build
+```
+
+Vypnout
+```commandline
+docker-compose down
+```
+## Bez dockeru (V pripade nouze)
 - Virtual enviroment
     - Libovolny - venv, anakonda
 - Stahnout si dependencies
@@ -39,12 +48,6 @@ Spustit celery (mit zapnuty redis pomoci WSL `redis-server`)
 celery -A backend worker --loglevel=info
 ```
 
-## Docker
-
-```commandline
-docker build --tag python-django .
-docker run --publish 8000:8000 python-django
-```
   
 # TODO
 - **site_management**: Tato aplikace by mohla řídit CRUD operace pro záznamy webu, stejně jako filtrování, 
