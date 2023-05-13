@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  django:
+    build: .
+    volumes:
+      - ./backend:/django/backend
+    ports:
+      - "8000:8000"
+    image: django:django
+    container_name: django_container
+    command: 'sh -c "cd backend && python manage.py runserver 0.0.0.0:8000"'
+
+  redis:
+    image: redis:6.0
+    container_name: redis_container
+
+  celery_worker:
+    build: .
+    image: django:django
+    container_name: celery_worker_container
+    command: 'sh -c "cd backend && celery -A backend worker -l info --pool=solo"'
+    volumes:
+      - ./backend:/django/backend
+    depends_on:
+      - django
+      - redis
+
+  celery_beat:
+    build: .
+    image: django:django
+    container_name: celery_beat_container
+    command: 'sh -c "cd backend && celery -A backend beat -l info --scheduler django_celery_beat.schedulers.DatabaseScheduler"'
+    volumes:
+      - ./backend:/django/backend
+    depends_on:
+      - django
+      - redis
+
+  flower:
+    build: .
+    image: django:django
+    container_name: flower_container
+    command: 'sh -c "cd backend && celery -A backend flower --port=5555"'
+    volumes:
+      - ./backend:/django/backend
+    ports:
+      - "5555:5555"
+    depends_on:
+      - django
+      - redis
