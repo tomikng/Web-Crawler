@@ -33,7 +33,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-Spustit celery (mit nainstalovanu REDIS)
+Spustit celery (mit zapnuty redis pomoci WSL `sudo service redis-server start`)
 ```commandline
 celery -A backend worker --loglevel=info
 ```
