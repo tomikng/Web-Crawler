@@ -10,42 +10,52 @@ from .crawler import Crawler
 @shared_task
 def crawl_website(website_record_label):
     website_record = WebsiteRecord.objects.get(label=website_record_label)
+    execution = create_or_get_execution(website_record)
     try:
-        crawler = Crawler(website_record)
-        execution, created = Execution.objects.get_or_create(
-            website_record=website_record,
-            defaults={
-                'status': 'pending',
-                'start_time': make_aware(datetime.now()),
-                'end_time': None,
-                'num_sites_crawled': 0
-            }
-        )
-        execution.status = 'pending'
-        execution.save()
-
-        crawler.crawl(website_record.url)
-        # crawler.crawl.delay(website_record.url)
-
-        # Update the Execution model with status and other required information
-        execution.status = "completed"
-        execution.end_time = timezone.now()
-        execution.num_sites_crawled = crawler.num_crawled
-        execution.save()
-
+        crawler_instance = Crawler(website_record)
+        execute_crawl(crawler_instance, website_record.url)
+        update_execution(execution, crawler_instance)
     except Exception as e:
-        # An error occurred during crawling
-        execution, created = Execution.objects.get_or_create(
-            website_record=website_record,
-            defaults={
-                'status': 'failed',
-                'start_time': make_aware(datetime.now()),
-                'end_time': None,
-                'num_sites_crawled': 0
-            }
-        )
-        execution.status = "failed"
-        execution.save()
+        handle_crawl_error(website_record, execution)
         raise e
-
     return execution.pk
+
+
+def create_or_get_execution(website_record):
+    defaults = {
+        'status': 'pending',
+        'start_time': make_aware(datetime.now()),
+        'end_time': None,
+        'num_sites_crawled': 0
+    }
+    execution, created = Execution.objects.get_or_create(
+        website_record=website_record,
+        defaults=defaults
+    )
+    return execution
+
+
+def execute_crawl(crawler_instance, url):
+    crawler_instance.crawl(url)
+
+
+def update_execution(execution, crawler_instance):
+    execution.status = 'completed'
+    execution.end_time = timezone.now()
+    execution.num_sites_crawled = crawler_instance.num_crawled
+    execution.save()
+
+
+def handle_crawl_error(website_record, execution):
+    execution.status = 'failed'
+    execution.save()
+    Execution.objects.get_or_create(
+        website_record=website_record,
+        defaults={
+            'status': 'failed',
+            'start_time': make_aware(datetime.now()),
+            'end_time': None,
+            'num_sites_crawled': 0
+        }
+    )
+
