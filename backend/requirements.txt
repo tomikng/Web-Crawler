@@ -1,6 +1,7 @@
 amqp==5.1.1
 aniso8601==9.0.1
 asgiref==3.6.0
+async-timeout==4.0.2
 beautifulsoup4==4.12.2
 billiard==3.6.4.0
 celery==5.2.7
@@ -29,6 +30,7 @@ prompt-toolkit==3.0.38
 python-crontab==2.7.1
 python-dateutil==2.8.2
 pytz==2023.3
+redis==4.5.5
 requests==2.30.0
 six==1.16.0
 soupsieve==2.4.1
