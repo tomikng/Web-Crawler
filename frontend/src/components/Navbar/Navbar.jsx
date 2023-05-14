@@ -13,6 +13,7 @@ const Navbar = ({ onItemClick }) => {
             <a className="active" href="#home">Home</a>
             <a href="#crawl" onClick={() => handleItemClick('crawl')}>Crawling</a>
             <a href="#graph" onClick={() => handleItemClick('graph')}>Graph</a>
+            <a href="#records" onClick={() => handleItemClick('records')}>Records</a>
             <a href="#about">Link 3</a>
         </div>
     </div>
