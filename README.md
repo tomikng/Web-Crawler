@@ -1,6 +1,4 @@
 # System requirements
-- Python 3.8 or newer
-- optional - Virtual enviroment
 - Docker
   
 
