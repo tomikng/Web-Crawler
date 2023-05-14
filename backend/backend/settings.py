@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     # Ostatni knihovny
     "graphene_django",
     "django_celery_beat",
+
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -55,6 +57,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -141,4 +146,13 @@ GRAPHENE = {
 
 CELERY_BROKER_URL = 'redis://redis:6379'
 
+
+# CORS
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3001',
+#     'http://localhost:3000',
+# ]
 
