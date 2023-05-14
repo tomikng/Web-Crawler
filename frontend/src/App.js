@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import './App.css';
 import { Navbar } from './components';
 import Crawl from './components/Content/Crawl/Crawl';
-import Graph from './components/Content/Graph/Graph';
-import Records from './components/Content/Records/Records';
+import WebsiteRecords from './components/Content/WebsiteRecords/WebsiteRecords';
+import CrawledPages from './components/Content/CrawledPages/CrawledPages';
 
 function App() {
   const [activeContent, setActiveContent] = useState(null);
@@ -15,8 +15,8 @@ function App() {
     <div className="App">
       <Navbar onItemClick={handleNavbarItemClick}/>
       {activeContent === 'crawl' && <Crawl />}
-      {activeContent === 'graph' && <Graph />}
-      {activeContent === 'records' && <Records />}
+      {activeContent === 'websiteRecords' && <WebsiteRecords />}
+      {activeContent === 'crawledPages' && <CrawledPages />}
     </div>
   );
 }
