@@ -50,6 +50,10 @@ const processWebsiteRecords = async (records, sortBy) => {
       return a.url.localeCompare(b.url);
     } else if (sortBy === '-url') {
       return b.url.localeCompare(a.url);
+    } else if (sortBy === 'start_time') {
+      return new Date(a.start_time) - new Date(b.start_time);
+    } else if (sortBy === '-start_time') {
+      return new Date(b.start_time) - new Date(a.start_time);
     }
     return 0;
   });
@@ -73,7 +77,9 @@ const WebsiteRecords = () => {
     fetchData();
   }, [sortedBy]);
 
-  const sortIcon = sortedBy === 'url' ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
+  const sortIcon = (field) => {
+    return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
+  };
 
   return (
     <div>
@@ -84,11 +90,13 @@ const WebsiteRecords = () => {
               <th>ID</th>
               <th>Label</th>
               <th onClick={() => setSortedBy(sortedBy === 'url' ? '-url' : 'url')}>
-                Url {sortIcon}
+                Url {sortIcon('url')}
               </th>
               <th>Periodicity</th>
               <th>Tags</th>
-              <th>Last time execution</th>
+              <th onClick={() => setSortedBy(sortedBy === 'start_time' ? '-start_time' : 'start_time')}>
+                Last time execution {sortIcon('start_time')}
+              </th>
               <th>Status last execution</th>
             </tr>
           </thead>
