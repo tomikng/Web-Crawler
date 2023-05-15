@@ -36,10 +36,6 @@ const ExecutionDetails = () => {
     // Implement the logic for editing the execution details
   };
 
-  const handleStartExecution = () => {
-    // Implement the logic for starting the execution
-  };
-
   return (
     <div className="execution-details">
       <h2 className="execution-details__title">Execution Details - ID: {id}</h2>
@@ -70,9 +66,6 @@ const ExecutionDetails = () => {
             </button>
             <button className="execution-details__button" onClick={handleEdit}>
               Edit
-            </button>
-            <button className="execution-details__button" onClick={handleStartExecution}>
-              Start Execution
             </button>
           </div>
         </div>
