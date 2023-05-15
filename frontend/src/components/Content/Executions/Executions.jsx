@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+
 import './Execution.css';
 import axios from 'axios';
 
@@ -44,9 +45,23 @@ const processWebsiteRecords = async (records) => {
   return processedRecords;
 };
 
+
 const Executions = () => {
   const [records, setRecords] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [filteredRecords, setFilteredRecords] = useState([]);
+  const [filterLabel, setFilterLabel] = useState('');
+
+  const filterRecords = useCallback(() => {
+    if (filterLabel) {
+      const filtered = records.filter((record) => record.label === filterLabel);
+      setFilteredRecords(filtered);
+    } else {
+      setFilteredRecords(records);
+    }
+  }, [filterLabel, records]);
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,11 +79,25 @@ const Executions = () => {
     setIsDialogOpen(true); // Open the dialog box
   };
 
+  useEffect(() => {
+    filterRecords();
+  }, [records, filterLabel, filterRecords]);
+
+
   return (
     <div className="executions-container">
       <button className="new-execution-button" onClick={handleNewExecutionClick}>
         New Execution
       </button>
+      <div className="filter-container">
+        <label htmlFor="filter">Filter by Label:</label>
+        <input
+          type="text"
+          id="filter"
+          value={filterLabel}
+          onChange={(e) => setFilterLabel(e.target.value)}
+        />
+      </div>
       {isDialogOpen && (
         <div className="dialog">
           <div className="dialog-content">
@@ -90,7 +119,7 @@ const Executions = () => {
           </tr>
         </thead>
         <tbody>
-          {records.map((record) => (
+          {filteredRecords.map((record) => (
             <tr key={record.id}>
               <td>{record.id}</td>
               <td>
