@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Crawl.css';
+import axios from "axios";
 
 const Crawl = () => {
 
@@ -24,6 +25,26 @@ const Crawl = () => {
     setTagInputValue(event.target.value);
   };
 
+  const saveWebsiteRecord = (data) => {
+      const base_url = 'http://127.0.0.1:8000/api';
+      const endpoint = '/website_records/create/';
+      const url = base_url + endpoint;
+
+      axios
+          .post(url, data)
+          .then(response => {
+            console.log('Data saved successfully:', response.data);
+            // Handle successful response here
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            // Handle error here
+      });
+
+
+
+  };
+
 
   const crawl = () => {
     const url = document.getElementById('crawl_url').value;
@@ -32,12 +53,22 @@ const Crawl = () => {
     const label = document.getElementById('crawl_label').value;
     const active = document.getElementById('crawl_active').checked;
 
-    console.log('URL:', url);
-    console.log('Boundary regexp:', regex);
-    console.log('Periodicity:', periodicity);
-    console.log('Label:', label);
-    console.log('Active:', active);
-    console.log('Tags:', tags);
+    // console.log('URL:', url);
+    // console.log('Boundary regexp:', regex);
+    // console.log('Periodicity:', periodicity);
+    // console.log('Label:', label);
+    // console.log('Active:', active);
+    // console.log('Tags:', tags);
+    const data = {
+      url: url,
+      boundary_regexp: regex,
+      periodicity: periodicity,
+      label: label,
+      active: active,
+      tags: tags.join(",")
+    };
+
+    saveWebsiteRecord(data);
   }
 
 
