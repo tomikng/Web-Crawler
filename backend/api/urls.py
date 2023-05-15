@@ -30,7 +30,6 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
     path('website_records/create/', create_website_record, name='create_website_record'),
     path('website_records/update/<int:identifier>/', update_website_record, name='update_website_record'),
