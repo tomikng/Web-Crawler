@@ -10,7 +10,7 @@ from .models import WebsiteRecord, Execution
 @api_view(['POST'])
 def create_website_record(request):
     """
-    Create a website record.
+    Create a website record. And straightaway the website will be crawled if is active
     """
     serializer = WebsiteRecordSerializer(data=request.data)
     if serializer.is_valid():
@@ -23,7 +23,7 @@ def create_website_record(request):
 @api_view(['POST'])
 def update_website_record(request, identifier):
     """
-    Update a website record.
+    Update a website record. And straightaway the website will be crawled if is active
     """
     website_record = get_object_or_404(WebsiteRecord, pk=identifier)
     serializer = WebsiteRecordSerializer(website_record, data=request.data)
@@ -90,3 +90,41 @@ def get_execution(request, identifier):
     execution = get_object_or_404(Execution, pk=identifier)
     serializer = ExecutionSerializer(execution)
     return Response(serializer.data)
+
+
+@swagger_auto_schema(method='POST', request_body=ExecutionSerializer)
+@api_view(['POST'])
+def create_execution(request):
+    """
+    Create an execution.
+    """
+    serializer = ExecutionSerializer(data=request.data)
+    if serializer.is_valid():
+        execution = serializer.save()
+        return Response({'success': True, 'execution': serializer.data})
+    return Response(serializer.errors, status=400)
+
+
+@swagger_auto_schema(method='POST', request_body=ExecutionSerializer)
+@api_view(['POST'])
+def update_execution(request, identifier):
+    """
+    Update an execution.
+    """
+    execution = get_object_or_404(Execution, pk=identifier)
+    serializer = ExecutionSerializer(execution, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'success': True, 'execution': serializer.data})
+    return Response(serializer.errors, status=400)
+
+
+@swagger_auto_schema(method='POST')
+@api_view(['POST'])
+def delete_execution(request, identifier):
+    """
+    Delete an execution.
+    """
+    execution = get_object_or_404(Execution, pk=identifier)
+    execution.delete()
+    return Response({'success': True})
