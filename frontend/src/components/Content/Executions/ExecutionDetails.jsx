@@ -23,6 +23,23 @@ const ExecutionDetails = () => {
     fetchExecutionDetails();
   }, [id]);
 
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`${BASE_URL}${id}/`);
+      // Perform any additional actions after successful deletion
+    } catch (error) {
+      console.error('Error deleting execution:', error);
+    }
+  };
+
+  const handleEdit = () => {
+    // Implement the logic for editing the execution details
+  };
+
+  const handleStartExecution = () => {
+    // Implement the logic for starting the execution
+  };
+
   return (
     <div className="execution-details">
       <h2 className="execution-details__title">Execution Details - ID: {id}</h2>
@@ -45,6 +62,18 @@ const ExecutionDetails = () => {
           </div>
           <div className="execution-details__field">
             <strong>Website Record:</strong> {execution.website_record}
+          </div>
+
+          <div className="execution-details__actions">
+            <button className="execution-details__button" onClick={handleDelete}>
+              Delete
+            </button>
+            <button className="execution-details__button" onClick={handleEdit}>
+              Edit
+            </button>
+            <button className="execution-details__button" onClick={handleStartExecution}>
+              Start Execution
+            </button>
           </div>
         </div>
       ) : (

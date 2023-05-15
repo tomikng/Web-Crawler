@@ -21,3 +21,27 @@
   font-weight: bold;
   margin-right: 5px;
 }
+
+.execution-details__actions {
+  margin-top: 20px;
+}
+
+.execution-details__button {
+  margin-right: 10px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.execution-details__button:hover {
+  background-color: #0056b3;
+}
+
+.execution-details__button:active {
+  background-color: #004399;
+}
+
