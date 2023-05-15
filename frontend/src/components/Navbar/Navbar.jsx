@@ -1,24 +1,20 @@
 import React from 'react';
 import './Navbar.css';
+import { Link, useLocation } from 'react-router-dom';
 
-const Navbar = ({ onItemClick }) => {
-
-    const handleItemClick = (content) => {
-        onItemClick(content);
-    };
+const Navbar = () => {
+  const location = useLocation();
 
   return (
     <div>
-        <div className="topnav">
-            <a className="active" href="#home">Home</a>
-            <a href="#crawl" onClick={() => handleItemClick('crawl')}>Crawling</a>
-            <a href="#websiteRecords" onClick={() => handleItemClick('websiteRecords')}>Websites Records</a>
-            <a href="#crawledPages" onClick={() => handleItemClick('crawledPages')}>Crawled Pages</a>  {/* By melo rozkliknout na tabulku nebo na graf */}
-            
-            <a href="#executions" onClick={() => handleItemClick('executions')}>Link 3</a>
-        </div>
+      <div className="topnav">
+        <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Crawling</Link>
+        <Link to="/websiteRecords" className={location.pathname === '/websiteRecords' ? 'active' : ''}>Website Records</Link>
+        <Link to="/crawledPages" className={location.pathname === '/crawledPages' ? 'active' : ''}>Crawled Pages</Link>
+        <Link to="/executions" className={location.pathname === '/executions' ? 'active' : ''}>Executions</Link>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
