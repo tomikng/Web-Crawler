@@ -46,6 +46,7 @@ const processWebsiteRecords = async (records) => {
 
 const Executions = () => {
   const [records, setRecords] = useState([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,10 +60,25 @@ const Executions = () => {
     fetchData();
   }, []);
 
+  const handleNewExecutionClick = () => {
+    setIsDialogOpen(true); // Open the dialog box
+  };
+
   return (
     <div className="executions-container">
-      <button className="new-execution-button">New Execution</button>
-      <table>
+      <button className="new-execution-button" onClick={handleNewExecutionClick}>
+        New Execution
+      </button>
+      {isDialogOpen && (
+        <div className="dialog">
+          <div className="dialog-content">
+            <h3>Create New Execution</h3>
+            {/* Add your form or additional content here */}
+            <button onClick={() => setIsDialogOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
+      <table className="executions-table">
         <thead>
           <tr>
             <th>ID</th>
