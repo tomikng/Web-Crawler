@@ -32,12 +32,14 @@ const processWebsiteRecords = async (records) => {
     const websiteRecord = await fetchWebsiteRecords(record.website_record);
     if (websiteRecord) {
       const { label } = websiteRecord;
+      const start_time = record.start_time ? new Date(record.start_time).toLocaleString() : 'None';
+      const end_time = record.end_time ? new Date(record.end_time).toLocaleString() : 'None';
       processedRecords.push({
         id: record.id,
         label,
         status: record.status,
-        start_time: new Date(record.start_time).toLocaleString(),
-        end_time: new Date(record.end_time).toLocaleString(),
+        start_time,
+        end_time,
         num_sites_crawled: record.num_sites_crawled,
       });
     }
