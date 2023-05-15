@@ -15,7 +15,7 @@ const Navbar = ({ onItemClick }) => {
             <a href="#websiteRecords" onClick={() => handleItemClick('websiteRecords')}>Websites Records</a>
             <a href="#crawledPages" onClick={() => handleItemClick('crawledPages')}>Crawled Pages</a>  {/* By melo rozkliknout na tabulku nebo na graf */}
             
-            <a href="#about">Link 3</a>
+            <a href="#executions" onClick={() => handleItemClick('executions')}>Link 3</a>
         </div>
     </div>
   )
