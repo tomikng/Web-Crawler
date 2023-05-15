@@ -1,0 +1,23 @@
+.execution-details {
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.execution-details__title {
+  margin-top: 0;
+}
+
+.execution-details__content {
+  margin-top: 20px;
+}
+
+.execution-details__field {
+  margin-bottom: 10px;
+}
+
+.execution-details__field strong {
+  font-weight: bold;
+  margin-right: 5px;
+}
