@@ -19,8 +19,8 @@ def create_website_record(request):
     return Response(serializer.errors, status=400)
 
 
-@swagger_auto_schema(method='POST', request_body=WebsiteRecordSerializer)
-@api_view(['POST'])
+@swagger_auto_schema(method='PUT', request_body=WebsiteRecordSerializer)
+@api_view(['PUT'])
 def update_website_record(request, identifier):
     """
     Update a website record. And straightaway the website will be crawled if is active
@@ -33,8 +33,8 @@ def update_website_record(request, identifier):
     return Response(serializer.errors, status=400)
 
 
-@swagger_auto_schema(method='POST')
-@api_view(['POST'])
+@swagger_auto_schema(method='DELETE')
+@api_view(['DELETE'])
 def delete_website_record(request, identifier):
     """
     Delete a website record.
@@ -105,8 +105,8 @@ def create_execution(request):
     return Response(serializer.errors, status=400)
 
 
-@swagger_auto_schema(method='POST', request_body=ExecutionSerializer)
-@api_view(['POST'])
+@swagger_auto_schema(method='PUT', request_body=ExecutionSerializer)
+@api_view(['PUT'])
 def update_execution(request, identifier):
     """
     Update an execution.
@@ -119,8 +119,8 @@ def update_execution(request, identifier):
     return Response(serializer.errors, status=400)
 
 
-@swagger_auto_schema(method='POST')
-@api_view(['POST'])
+@swagger_auto_schema(method='DELETE')
+@api_view(['DELETE'])
 def delete_execution(request, identifier):
     """
     Delete an execution.
