@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     # Ostatni knihovny
     "graphene_django",
     "django_celery_beat",
-
+    'drf_yasg',
     'corsheaders',
 ]
 
@@ -156,3 +156,6 @@ CORS_ORIGIN_ALLOW_ALL = True
 #     'http://localhost:3000',
 # ]
 
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'backend.urls.openapi_info',
+}
