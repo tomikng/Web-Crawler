@@ -32,7 +32,7 @@ const processWebsiteRecords = async (records) => {
     const websiteRecord = await fetchWebsiteRecords(record.website_record);
     if (websiteRecord) {
       const { label } = websiteRecord;
-       processedRecords.push({
+      processedRecords.push({
         id: record.id,
         label,
         status: record.status,
@@ -61,32 +61,35 @@ const Executions = () => {
   }, []);
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Label</th>
-          <th>Execution Status</th>
-          <th>Start</th>
-          <th>End</th>
-          <th>Number of Crawled Pages</th>
-        </tr>
-      </thead>
-      <tbody>
-        {records.map((record) => (
-          <tr key={record.id}>
-            <td>{record.id}</td>
-            <td>
-              <a href={`/executions/${record.id}`}>{record.label}</a>
-            </td>
-            <td>{record.status}</td>
-            <td>{record.start_time}</td>
-            <td>{record.end_time}</td>
-            <td>{record.num_sites_crawled}</td>
+    <div className="executions-container">
+      <button className="new-execution-button">New Execution</button>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Label</th>
+            <th>Execution Status</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Number of Crawled Pages</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {records.map((record) => (
+            <tr key={record.id}>
+              <td>{record.id}</td>
+              <td>
+                <a href={`/executions/${record.id}`}>{record.label}</a>
+              </td>
+              <td>{record.status}</td>
+              <td>{record.start_time}</td>
+              <td>{record.end_time}</td>
+              <td>{record.num_sites_crawled}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 
