@@ -85,7 +85,7 @@ const WebsiteRecords = () => {
                   <tr key={wesiteRecord.websiteRecord}>
                     <td>{wesiteRecord.websiteRecord}</td>
                     <td>
-                      <a href={`/executions/${wesiteRecord.id}`}>{wesiteRecord.label}</a>
+                      <a href={`/website_records/${wesiteRecord.websiteRecord}`}>{wesiteRecord.label}</a>
                     </td>
                     <td>{wesiteRecord.url}</td>
                     <td>{wesiteRecord.periodicity}</td>
