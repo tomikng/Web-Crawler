@@ -8,7 +8,6 @@ const fetchExecutions = async () => {
   try {
     const response = await axios.get(`${base_url}/executions/`);
     const data = response.data;
-    // console.log(data);
     return data;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -36,8 +35,8 @@ const processWebsiteRecords = async (records) => {
         id: record.id,
         label,
         status: record.status,
-        start_time: record.start_time,
-        end_time: record.end_time,
+        start_time: new Date(record.start_time).toLocaleString(),
+        end_time: new Date(record.end_time).toLocaleString(),
         num_sites_crawled: record.num_sites_crawled,
       });
     }
