@@ -17,9 +17,9 @@ class Crawler:
         self.visited_urls = set()
         self.num_crawled = 0
 
-    def crawl(self, start_url):
+    def crawl(self, start_url, ex_id):
         queue = deque([start_url])
-        execution = self.get_execution()
+        execution = self.get_execution(ex_id)
         execution.save()
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -36,8 +36,12 @@ class Crawler:
 
                 self.enqueue_valid_links(links, queue)
 
-    def get_execution(self):
-        execution = Execution.objects.get(website_record=self.website_record)
+    def get_execution(self, execution_id):
+        try:
+            execution = Execution.objects.get(id=execution_id)
+        except Execution.DoesNotExist:
+            # Handle the case when the execution with the given ID does not exist
+            return None
 
         execution.status = 'running'
         execution.start_time = make_aware(datetime.now())
@@ -81,14 +85,20 @@ class Crawler:
         crawl_time = datetime.now()
         title = self.extract_title(html)
 
-        crawled_page, created = CrawledPage.objects.update_or_create(
+        crawled_page, created = CrawledPage.objects.get_or_create(
             url=url,
-            execution=execution,
             defaults={
                 'crawl_time': make_aware(crawl_time),
                 'title': title,
+                'execution': execution,
             }
         )
+
+        if not created:
+            crawled_page.crawl_time = make_aware(crawl_time)
+            crawled_page.title = title
+            crawled_page.execution = execution
+            crawled_page.save()
 
         crawled_page.set_links(links, execution=execution)
         crawled_page.save()

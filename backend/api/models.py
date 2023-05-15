@@ -48,6 +48,9 @@ class Execution(models.Model):
     def __str__(self):
         return f"{self.website_record.label} - {self.status}"
 
+    class Meta:
+        unique_together = []
+
 
 class CrawledPage(models.Model):
     id = models.AutoField(primary_key=True)

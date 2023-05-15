@@ -10,33 +10,30 @@ from .crawler import Crawler
 @shared_task
 def crawl_website(website_record_label):
     website_record = WebsiteRecord.objects.get(label=website_record_label)
-    execution = create_or_get_execution(website_record)
+    execution = create_new_execution(website_record)
     try:
         crawler_instance = Crawler(website_record)
-        execute_crawl(crawler_instance, website_record.url)
+        execute_crawl(crawler_instance, website_record.url, execution.id)
         update_execution(execution, crawler_instance)
     except Exception as e:
-        handle_crawl_error(website_record, execution)
+        handle_crawl_error(execution)
         raise e
     return website_record_label
 
 
-def create_or_get_execution(website_record):
-    defaults = {
-        'status': 'pending',
-        'start_time': make_aware(datetime.now()),
-        'end_time': None,
-        'num_sites_crawled': 0
-    }
-    execution, created = Execution.objects.get_or_create(
+def create_new_execution(website_record):
+    execution = Execution.objects.create(
         website_record=website_record,
-        defaults=defaults
+        status='pending',
+        start_time=make_aware(datetime.now()),
+        end_time=None,
+        num_sites_crawled=0
     )
     return execution
 
 
-def execute_crawl(crawler_instance, url):
-    crawler_instance.crawl(url)
+def execute_crawl(crawler_instance, url, ex_id):
+    crawler_instance.crawl(url, ex_id)
 
 
 def update_execution(execution, crawler_instance):
@@ -46,16 +43,9 @@ def update_execution(execution, crawler_instance):
     execution.save()
 
 
-def handle_crawl_error(website_record, execution):
+def handle_crawl_error(execution):
     execution.status = 'failed'
+    execution.start_time = make_aware(datetime.now())
+    execution.end_time = None
+    execution.num_sites_crawled = 0
     execution.save()
-    Execution.objects.get_or_create(
-        website_record=website_record,
-        defaults={
-            'status': 'failed',
-            'start_time': make_aware(datetime.now()),
-            'end_time': None,
-            'num_sites_crawled': 0
-        }
-    )
-
