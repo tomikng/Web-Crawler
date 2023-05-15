@@ -77,7 +77,7 @@ const Executions = () => {
           <tr key={record.id}>
             <td>{record.id}</td>
             <td>
-              <a href={`/records/${record.id}`}>{record.label}</a>
+              <a href={`/executions/${record.id}`}>{record.label}</a>
             </td>
             <td>{record.status}</td>
             <td>{record.start_time}</td>
