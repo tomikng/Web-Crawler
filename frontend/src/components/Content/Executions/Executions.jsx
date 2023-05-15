@@ -51,6 +51,8 @@ const Executions = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [filterLabel, setFilterLabel] = useState('');
+  const [uniqueLabels, setUniqueLabels] = useState([]);
+
 
   const filterRecords = useCallback(() => {
     if (filterLabel) {
@@ -69,6 +71,10 @@ const Executions = () => {
       if (executionData) {
         const processedData = await processWebsiteRecords(executionData);
         setRecords(processedData);
+
+        // extract unique labels
+        const labels = [...new Set(processedData.map(record => record.label))];
+        setUniqueLabels(labels);
       }
     };
 
@@ -91,12 +97,18 @@ const Executions = () => {
       </button>
       <div className="filter-container">
         <label htmlFor="filter">Filter by Label:</label>
-        <input
-          type="text"
+        <select
           id="filter"
           value={filterLabel}
           onChange={(e) => setFilterLabel(e.target.value)}
-        />
+        >
+          <option value="">All</option>
+          {uniqueLabels.map((label, index) => (
+            <option key={index} value={label}>
+              {label}
+            </option>
+          ))}
+        </select>
       </div>
       {isDialogOpen && (
         <div className="dialog">
