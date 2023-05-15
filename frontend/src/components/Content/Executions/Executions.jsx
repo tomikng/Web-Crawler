@@ -4,10 +4,11 @@ import axios from 'axios';
 
 const base_url = 'http://127.0.0.1:8000/api';
 
-const fetchExecutions = async (page) => {
+const fetchExecutions = async () => {
   try {
-    const response = await axios.get(`${base_url}/executions/?page=${page}`);
+    const response = await axios.get(`${base_url}/executions/`);
     const data = response.data;
+    // console.log(data);
     return data;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -31,7 +32,7 @@ const processWebsiteRecords = async (records) => {
     const websiteRecord = await fetchWebsiteRecords(record.website_record);
     if (websiteRecord) {
       const { label } = websiteRecord;
-      processedRecords.push({
+       processedRecords.push({
         id: record.id,
         label,
         status: record.status,
@@ -46,65 +47,46 @@ const processWebsiteRecords = async (records) => {
 
 const Executions = () => {
   const [records, setRecords] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
-      const executionData = await fetchExecutions(currentPage);
+      const executionData = await fetchExecutions();
       if (executionData) {
-        const processedData = await processWebsiteRecords(executionData.results);
+        const processedData = await processWebsiteRecords(executionData);
         setRecords(processedData);
       }
     };
 
     fetchData();
-  }, [currentPage]);
-
-  const nextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-  };
-
-  const previousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  };
+  }, []);
 
   return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Label</th>
-            <th>Execution Status</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Number of Crawled Pages</th>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Label</th>
+          <th>Execution Status</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>Number of Crawled Pages</th>
+        </tr>
+      </thead>
+      <tbody>
+        {records.map((record) => (
+          <tr key={record.id}>
+            <td>{record.id}</td>
+            <td>
+              <a href={`/records/${record.id}`}>{record.label}</a>
+            </td>
+            <td>{record.status}</td>
+            <td>{record.start_time}</td>
+            <td>{record.end_time}</td>
+            <td>{record.num_sites_crawled}</td>
           </tr>
-        </thead>
-        <tbody>
-          {records.map((record) => (
-            <tr key={record.id}>
-              <td>{record.id}</td>
-              <td>
-                <a href={`/records/${record.id}`}>{record.label}</a>
-              </td>
-              <td>{record.status}</td>
-              <td>{record.start_time}</td>
-              <td>{record.end_time}</td>
-              <td>{record.num_sites_crawled}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <div>
-        <button onClick={previousPage} disabled={currentPage === 1}>
-          Previous Page
-        </button>
-        <button onClick={nextPage}>Next Page</button>
-      </div>
-    </div>
+        ))}
+      </tbody>
+    </table>
   );
 };
 
