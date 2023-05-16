@@ -37,7 +37,6 @@ const processWebsiteRecords = async (records, sortBy) => {
         label: label,
         url: websiteRecord.url,
         periodicity: websiteRecord.periodicity,
-        status: record.status,
         tags: websiteRecord.tags,
         start_time: new Date(record.start_time).toLocaleString(),
         status: record.status
@@ -61,16 +60,19 @@ const processWebsiteRecords = async (records, sortBy) => {
   return processedRecords;
 };
 
+
 const WebsiteRecords = () => {
-  const [wesiteRecords, setWesiteRecords] = useState([]);
+  const [websiteRecords, setWebsiteRecords] = useState([]);
   const [sortedBy, setSortedBy] = useState('url');
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
       const executionData = await fetchExecutions();
       if (executionData) {
         const processedData = await processWebsiteRecords(executionData, sortedBy);
-        setWesiteRecords(processedData);
+        setWebsiteRecords(processedData);
       }
     };
 
@@ -79,6 +81,17 @@ const WebsiteRecords = () => {
 
   const sortIcon = (field) => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
+  };
+
+  // Calculate pagination values
+  const totalRecords = websiteRecords.length;
+  const totalPages = Math.ceil(totalRecords / recordsPerPage);
+  const startIndex = (currentPage - 1) * recordsPerPage;
+  const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);
+  const currentRecords = websiteRecords.slice(startIndex, endIndex + 1);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -90,7 +103,7 @@ const WebsiteRecords = () => {
               <th>ID</th>
               <th>Label</th>
               <th onClick={() => setSortedBy(sortedBy === 'url' ? '-url' : 'url')}>
-                Url {sortIcon('url')}
+                  Url {sortIcon('url')}
               </th>
               <th>Periodicity</th>
               <th>Tags</th>
@@ -101,24 +114,44 @@ const WebsiteRecords = () => {
             </tr>
           </thead>
           <tbody>
-            {wesiteRecords.map((wesiteRecord) => (
-              <tr key={wesiteRecord.websiteRecord}>
-                <td>{wesiteRecord.websiteRecord}</td>
+            {currentRecords.map((websiteRecord) => (
+              <tr key={websiteRecord.websiteRecord}>
+                <td>{websiteRecord.websiteRecord}</td>
                 <td>
-                  <a href={`/website_records/${wesiteRecord.websiteRecord}`}>{wesiteRecord.label}</a>
+                  <a href={`/website_records/${websiteRecord.websiteRecord}`}>
+                    {websiteRecord.label}
+                  </a>
                 </td>
-                <td>{wesiteRecord.url}</td>
-                <td>{wesiteRecord.periodicity}</td>
-                <td>{wesiteRecord.tags}</td>
-                <td>{wesiteRecord.start_time}</td>
-                <td>{wesiteRecord.status}</td>
+                <td>{websiteRecord.url}</td>
+                <td>{websiteRecord.periodicity}</td>
+                <td>{websiteRecord.tags}</td>
+                <td>{websiteRecord.start_time}</td>
+                <td>{websiteRecord.status}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+      <div className="pagination">
+    <p>
+      Page {currentPage} of {totalPages}
+    </p>
+    <button
+      className="pagination-button"
+      disabled={currentPage === 1}
+      onClick={() => handlePageChange(currentPage - 1)}
+    >
+      Previous
+    </button>
+    <button
+      className="pagination-button"
+      disabled={currentPage === totalPages}
+      onClick={() => handlePageChange(currentPage + 1)}
+    >
+      Next
+    </button>
+  </div>
+</div>
   );
 };
-
 export default WebsiteRecords;
