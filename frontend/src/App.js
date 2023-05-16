@@ -7,6 +7,7 @@ import WebsiteRecords from './components/Content/WebsiteRecords/WebsiteRecords';
 import CrawledPages from './components/Content/CrawledPages/CrawledPages';
 import Executions from './components/Content/Executions/Executions';
 import ExecutionDetails from './components/Content/Executions/ExecutionDetails';
+import WebsiteRecordsDetail from './components/Content/WebsiteRecords/WebsiteRecordsDetail';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Crawl />} />
           <Route path="/websiteRecords" element={<WebsiteRecords />} />
+          <Route path="/website_records/:id" element={<WebsiteRecordsDetail />} />
           <Route path="/crawledPages" element={<CrawledPages />} />
           <Route path="/executions" element={<Executions />} />
           <Route path="/executions/:id" element={<ExecutionDetails />} />
