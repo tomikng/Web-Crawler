@@ -16,7 +16,7 @@ const WebsiteRecordsDetail = () => {
   useEffect(() => {
     const fetchWebsiteRecordDetails = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}${id}/`);
+        const response = await axios.get(`${BASE_URL}/${id}/`);
         const data = response.data;
 
         console.log(data);
@@ -59,12 +59,11 @@ const WebsiteRecordsDetail = () => {
   };
 
   const handleCancel = () => {
-    
     setEditMode(false);
+    setUpdatedRecord(websiteRecord); // Reset to original values
   };
 
   const handleSaveChange = async () => {
-    
     const updatedRecordValues = {
       label: updatedRecord.label,
       url: updatedRecord.url,
@@ -73,9 +72,6 @@ const WebsiteRecordsDetail = () => {
       active: updatedRecord.active,
       tags: tags.join(',')
     };
-  
-    // console.log('Updated Record:', updatedRecordValues);
-    // console.log('Tags:', tags);
 
     try {
       const response = await axios.put(`${BASE_URL}/update/${id}/`, updatedRecordValues);
@@ -85,7 +81,6 @@ const WebsiteRecordsDetail = () => {
     } catch (error) {
       console.error('Error updating record:', error);
     }
-
   };
 
   const removeTag = (tagText) => {
@@ -141,7 +136,7 @@ const WebsiteRecordsDetail = () => {
                 <strong>Periodicity:</strong>
               </label>{' '}
               {editMode ? (
-                <select name="periodicity" id="crawl_periodicity" onChange={handleInputChange}>
+                <select name="periodicity" id="website-record-detail-periodicity" value={updatedRecord.periodicity} onChange={handleInputChange}>
                   <option value="minute">Minute</option>
                   <option value="hour">Hour</option>
                   <option value="day">Day</option>
@@ -185,22 +180,22 @@ const WebsiteRecordsDetail = () => {
               <strong>Tags:</strong>{' '}
               {editMode ? (
                 <>
-                   <div id="tags-container">
-                  <input
-                    type="text"
-                    id="tag-input"
-                    placeholder="Add a tag"
-                    value={tagInputValue}
-                    onChange={handleTagInputChange}
-                    onKeyUp={(event) => {
-                      if (event.key === 'Enter') {
-                        addTag();
-                      }
-                    }}
-                  />
-                </div>
+                  <div id="tags-container">
+                    <input
+                      type="text"
+                      id="tag-input"
+                      placeholder="Add a tag"
+                      value={tagInputValue}
+                      onChange={handleTagInputChange}
+                      onKeyUp={(event) => {
+                        if (event.key === 'Enter') {
+                          addTag();
+                        }
+                      }}
+                    />
+                  </div>
 
-                    <div id="tag-list">                    
+                  <div id="tag-list">
                     {tags.map((tag) => (
                       <span className="tag" key={tag}>
                         {tag}
@@ -208,9 +203,7 @@ const WebsiteRecordsDetail = () => {
                       </span>
                     ))}
                   </div>
-
                 </>
-                
               ) : (
                 websiteRecord.tags
               )}
