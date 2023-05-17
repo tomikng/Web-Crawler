@@ -1,3 +1,8 @@
+.executions-container{
+  width: 80%;
+  margin: 0 auto;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -25,10 +30,6 @@ td a:hover {
   text-decoration: underline;
 }
 
-.executions-container {
-  max-width: 800px;
-  margin: 0 auto;
-}
 
 .executions-table {
   margin-bottom: 20px; /* Add margin at the bottom of the table */

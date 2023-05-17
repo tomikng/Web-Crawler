@@ -1,3 +1,7 @@
+Jak se připojit na PostgreSQL
+
+https://www.youtube.com/watch?v=HEV1PWycOuQ
+
 
 Přechod z SQLite na PostgreSQL se skládá z několika kroků:
 

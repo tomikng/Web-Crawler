@@ -55,6 +55,9 @@ const Executions = () => {
   const [filterLabel, setFilterLabel] = useState('');
   const [uniqueLabels, setUniqueLabels] = useState([]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 3;
+
 
   const filterRecords = useCallback(() => {
     if (filterLabel) {
@@ -91,9 +94,23 @@ const Executions = () => {
     filterRecords();
   }, [records, filterLabel, filterRecords]);
 
+   // Calculate pagination values
+    const totalRecords = filteredRecords.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);
+    const currentRecords = filteredRecords.slice(startIndex, endIndex + 1);
+
+ 
+   const handlePageChange = (page) => {
+     setCurrentPage(page);
+   };
+ 
+
 
   return (
-    <div className="executions-container">
+    <div>
+         <div className="executions-container">
       <button className="new-execution-button" onClick={handleNewExecutionClick}>
         New Execution
       </button>
@@ -133,7 +150,7 @@ const Executions = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredRecords.map((record) => (
+          {currentRecords.map((record) => (
             <tr key={record.id}>
               <td>{record.id}</td>
               <td>
@@ -148,6 +165,28 @@ const Executions = () => {
         </tbody>
       </table>
     </div>
+        <div className="pagination">
+          <p>
+            Page {currentPage} of {totalPages}
+          </p>
+          <button
+            className="pagination-button"
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            Previous
+          </button>
+          <button
+            className="pagination-button"
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            Next
+          </button>
+        </div>
+    </div>
+   
+    
   );
 };
 
