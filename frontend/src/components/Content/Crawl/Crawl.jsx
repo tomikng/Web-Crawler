@@ -56,9 +56,9 @@ const Crawl = () => {
     }
 
     if (!isValidUrl(url)) {
-      alert('Please enter a valid URL');
-      urlInput.focus();
-      return false;
+      // alert('Please enter a valid URL');
+      // urlInput.focus();
+      // return false;
     }
 
     if (regex === '') {
@@ -163,10 +163,7 @@ const Crawl = () => {
           </div>
           <button className='crawl_button' onClick={() => crawl()}>Crawl</button>
       </div>
-
-      
     </div>
-
 
   );
 };

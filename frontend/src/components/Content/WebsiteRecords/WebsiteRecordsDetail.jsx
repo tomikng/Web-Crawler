@@ -11,16 +11,11 @@ const WebsiteRecordsDetail = () => {
 
     const [websiteRecord, setwebsiteRecord] = useState(null);
 
-    useEffect(() => {
-        console.log(id);
-        
+    useEffect(() => {        
         const fetchwebsiteRecordDetails = async () => {
           try {
             const response = await axios.get(`${BASE_URL}${id}/`);
             const data = response.data;
-
-            console.log(data);
-
             setwebsiteRecord(data);
           } catch (error) {
             console.error('Error fetching website record details:', error);
@@ -30,11 +25,9 @@ const WebsiteRecordsDetail = () => {
         fetchwebsiteRecordDetails();
       }, [id]);
     
-  
     return (
     <div className="websiteRecords-details">
          <h2 className="website-records-details__title">Website Records Details - ID: {id}</h2>
-
          {websiteRecord ? (
         <div className="website-records-details__content">
           <div className="website-records-details__field">
@@ -56,7 +49,7 @@ const WebsiteRecordsDetail = () => {
             <strong>Tags:</strong> {websiteRecord.tags}
           </div>
           <div className="website-records-details__field">
-            <strong>Active:</strong> {websiteRecord.active}
+            <strong>Active:</strong> {websiteRecord.active ? "true" : "false"}
           </div>
          
         </div>
