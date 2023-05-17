@@ -7,12 +7,12 @@ const ExecutionDetails = () => {
   const { id } = useParams();
   const [execution, setExecution] = useState(null);
 
-  const BASE_URL = 'http://127.0.0.1:8000/api/executions/';
+  const BASE_URL = 'http://127.0.0.1:8000/api/executions';
 
   useEffect(() => {
     const fetchExecutionDetails = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}${id}/`);
+        const response = await axios.get(`${BASE_URL}/${id}/`);
         const data = response.data;
         setExecution(data);
       } catch (error) {
@@ -25,7 +25,7 @@ const ExecutionDetails = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${BASE_URL}${id}/`);
+      await axios.delete(`${BASE_URL}/${id}/`);
       // Perform any additional actions after successful deletion
     } catch (error) {
       console.error('Error deleting execution:', error);
