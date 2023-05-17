@@ -56,7 +56,7 @@ const Executions = () => {
   const [uniqueLabels, setUniqueLabels] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 10;
+  const recordsPerPage = 3;
 
 
   const filterRecords = useCallback(() => {

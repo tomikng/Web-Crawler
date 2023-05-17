@@ -64,40 +64,46 @@ const processWebsiteRecords = async (records, sortBy) => {
 
 const WebsiteRecords = () => {
   const [websiteRecords, setWebsiteRecords] = useState([]);
-
-  const [sortedBy, setSortedBy] = useState('url');	
-  const [currentPage, setCurrentPage] = useState(1);	
-  const recordsPerPage = 10;
+  const [sortedBy, setSortedBy] = useState('url');  
+  const [currentPage, setCurrentPage] = useState(1);  
+  const recordsPerPage = 5;
 
   const [filterLabel, setFilterLabel] = useState('');
   const [filterUrl, setFilterUrl] = useState('');
   const [filterTags, setFilterTags] = useState('');
+
+  const [displayedRecords, setDisplayedRecords] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       const executionData = await fetchExecutions();
       if (executionData) {
         const processedData = await processWebsiteRecords(executionData, sortedBy);
+        console.log(processedData);
         setWebsiteRecords(processedData);
       }
     };
 
     fetchData();
-  }, [sortedBy]);
+  }, [sortedBy]); 
+
+
+  useEffect(() => {
+    // Apply filters and pagination when websiteRecords or filters change
+    const filteredRecords = applyFilters(websiteRecords);
+    const totalRecords = filteredRecords.length;
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);
+    setDisplayedRecords(filteredRecords.slice(startIndex, endIndex + 1));
+  }, [websiteRecords, filterLabel, filterUrl, filterTags, currentPage]);
 
   const sortIcon = (field) => {	
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
   };
-
-   // Calculate pagination values	
-   const totalRecords = websiteRecords.length;	
-   const totalPages = Math.ceil(totalRecords / recordsPerPage);	
-   const startIndex = (currentPage - 1) * recordsPerPage;	
-   const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);	
-   let currentRecords = websiteRecords.slice(startIndex, endIndex + 1);	
-   const handlePageChange = (page) => {	
-     setCurrentPage(page);	
-   };
 
   const applyFilters = (records) => {
     return records.filter((record) => {
@@ -107,6 +113,17 @@ const WebsiteRecords = () => {
       return labelMatch && urlMatch && tagsMatch;
     });
   };
+
+   const filteredRecords = applyFilters(websiteRecords);
+   // Calculate pagination values  
+   const totalRecords = filteredRecords.length;  
+   const totalPages = Math.ceil(totalRecords / recordsPerPage);  
+   const startIndex = (currentPage - 1) * recordsPerPage;  
+   const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);  
+   const currentRecords = filteredRecords.slice(startIndex, endIndex + 1);  
+   const handlePageChange = (page) => {  
+     setCurrentPage(page);  
+   };
 
   const handleFilterLabelChange = (event) => {
     setFilterLabel(event.target.value);
@@ -120,7 +137,7 @@ const WebsiteRecords = () => {
     setFilterTags(event.target.value);
   };
 
-  currentRecords = applyFilters(websiteRecords);
+  // currentRecords = applyFilters(websiteRecords);
 
   return (
     <div>
@@ -134,10 +151,10 @@ const WebsiteRecords = () => {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Label</th>
               <th onClick={() => setSortedBy(sortedBy === 'url' ? '-url' : 'url')}>	
                   Url {sortIcon('url')}	
               </th>
-              <th>Url</th>
               <th>Periodicity</th>
               <th>Tags</th>
               <th onClick={() => setSortedBy(sortedBy === 'start_time' ? '-start_time' : 'start_time')}>	
@@ -147,8 +164,8 @@ const WebsiteRecords = () => {
         </tr>
       </thead>
       <tbody>
-          {currentRecords.map((websiteRecord) => (	
-            <tr key={websiteRecord.websiteRecord}>	
+          {displayedRecords.map((websiteRecord, index) => (	
+            <tr key={websiteRecord.id}>	
               <td>{websiteRecord.websiteRecord}</td>	
               <td>	
                 <a href={`/website_records/${websiteRecord.websiteRecord}`}>	
