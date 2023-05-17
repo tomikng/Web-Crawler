@@ -164,7 +164,7 @@ const WebsiteRecords = () => {
         </tr>
       </thead>
       <tbody>
-          {displayedRecords.map((websiteRecord, index) => (	
+          {displayedRecords.map((websiteRecord) => (	
             <tr key={websiteRecord.id}>	
               <td>{websiteRecord.websiteRecord}</td>	
               <td>	

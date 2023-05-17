@@ -1,0 +1,20 @@
+.websiteRecords-details{
+    width: 60%;
+    margin: 0 auto;
+}
+
+.website-record-details__actions{
+    margin-top: 1rem;
+}
+
+.delete-button{
+    background-color: red;
+}
+
+.edit-button{
+    background-color: hsla(39, 100%, 50%, 0.967);
+}
+
+.website-record-details__field{
+    margin-top: 1rem;
+}
