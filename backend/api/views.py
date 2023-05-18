@@ -100,8 +100,10 @@ def create_execution(request, website_id):
     Create an execution for the specified website.
     """
     website = get_object_or_404(WebsiteRecord, pk=website_id)
-    execution = Execution.objects.create(website_record=website)
-    serializer = ExecutionSerializer(execution)
+    # execution = Execution.objects.create(website_record=website)
+    # serializer = ExecutionSerializer(execution)
+    from webcrawler.tasks import crawl_website
+    crawl_website.delay(website.label)
     return Response({'success': True, 'execution': serializer.data})
 
 
