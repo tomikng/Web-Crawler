@@ -10,7 +10,7 @@ from .crawler import Crawler
 @shared_task
 def crawl_website(website_record_label):
     website_record = WebsiteRecord.objects.get(label=website_record_label)
-    execution = get_or_create_new_execution(website_record)
+    execution = create_new_execution(website_record)
     try:
         crawler_instance = Crawler(website_record)
         execute_crawl(crawler_instance, website_record.url, execution.id)
@@ -21,17 +21,16 @@ def crawl_website(website_record_label):
     return website_record_label
 
 
-def get_or_create_new_execution(website_record):
-    execution, created = Execution.objects.update_or_create(
+def create_new_execution(website_record):
+    execution = Execution.objects.create(
         website_record=website_record,
-        defaults={
-            'status': 'pending',
-            'start_time': make_aware(datetime.now()),
-            'end_time': None,
-            'num_sites_crawled': 0
-        }
+        status='pending',
+        start_time=make_aware(datetime.now()),
+        end_time=None,
+        num_sites_crawled=0
     )
     return execution
+
 
 
 def execute_crawl(crawler_instance, url, ex_id):
