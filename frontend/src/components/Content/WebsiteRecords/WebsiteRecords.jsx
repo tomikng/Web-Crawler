@@ -26,41 +26,48 @@ const fetchWebsiteRecords = async (id) => {
 };
 
 const processWebsiteRecords = async (records, sortBy) => {
-  const processedRecords = [];
+  const groupedRecords = {};
+
   for (const record of records) {
     const websiteRecord = await fetchWebsiteRecords(record.website_record);
 
     if (websiteRecord) {
-      const { label } = websiteRecord;
-      processedRecords.push({
-        id: record.id,
-        websiteRecord: websiteRecord.id,
-        label: label,
-        url: websiteRecord.url,
-        periodicity: websiteRecord.periodicity,
-        status: record.status,
-        tags: websiteRecord.tags,
-        start_time: new Date(record.start_time).toLocaleString(),
-        status: record.status
-      });
+      const { id, label, url, periodicity, tags } = websiteRecord;
+      const startTime = new Date(record.start_time).toLocaleString();
+
+      if (!groupedRecords[id] || new Date(groupedRecords[id].start_time) < new Date(startTime)) {
+        groupedRecords[id] = {
+          id: record.id,
+          websiteRecord: id,
+          label: label,
+          url: url,
+          periodicity: periodicity,
+          status: record.status,
+          tags: tags,
+          start_time: startTime,
+        };
+      }
     }
   }
 
-  processedRecords.sort((a, b) => {	
-    if (sortBy === 'url') {	
-      return a.url.localeCompare(b.url);	
-    } else if (sortBy === '-url') {	
-      return b.url.localeCompare(a.url);	
-    } else if (sortBy === 'start_time') {	
-      return new Date(a.start_time) - new Date(b.start_time);	
-    } else if (sortBy === '-start_time') {	
-      return new Date(b.start_time) - new Date(a.start_time);	
-    }	
-    return 0;	
+  const processedRecords = Object.values(groupedRecords);
+
+  processedRecords.sort((a, b) => {
+    if (sortBy === 'url') {
+      return a.url.localeCompare(b.url);
+    } else if (sortBy === '-url') {
+      return b.url.localeCompare(a.url);
+    } else if (sortBy === 'start_time') {
+      return new Date(a.start_time) - new Date(b.start_time);
+    } else if (sortBy === '-start_time') {
+      return new Date(b.start_time) - new Date(a.start_time);
+    }
+    return 0;
   });
 
   return processedRecords;
 };
+
 
 const WebsiteRecords = () => {
   const [websiteRecords, setWebsiteRecords] = useState([]);
