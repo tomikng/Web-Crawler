@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -88,8 +89,11 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        'HOST': "db",
+        'NAME': "app",
+        'USER': "postgres",
+        'PASSWORD': "postgres",
     }
 }
 
@@ -144,8 +148,9 @@ GRAPHENE = {
 # Celery
 
 
-# CELERY_BROKER_URL = 'redis://redis:6379'
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_BROKER_URL = 'redis://redis:6379'
+# CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
+CELERY_RESULT_BACKEND = "redis://redis:6379"
 
 
 # CORS
@@ -160,3 +165,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 SWAGGER_SETTINGS = {
     'DEFAULT_INFO': 'backend.urls.openapi_info',
 }
+
+
