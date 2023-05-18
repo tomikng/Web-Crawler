@@ -104,7 +104,7 @@ def create_execution(request, website_id):
     # serializer = ExecutionSerializer(execution)
     from webcrawler.tasks import crawl_website
     crawl_website.delay(website.label)
-    return Response({'success': True})
+    return Response({'success': True, 'execution': serializer.data})
 
 
 @swagger_auto_schema(method='PUT', request_body=ExecutionSerializer)
