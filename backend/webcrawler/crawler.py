@@ -98,9 +98,10 @@ class Crawler:
             crawled_page.crawl_time = make_aware(crawl_time)
             crawled_page.title = title
             crawled_page.execution = execution
+            crawled_page.set_links(links, execution=execution)
+
             crawled_page.save()
 
-        crawled_page.set_links(links, execution=execution)
         crawled_page.save()
 
         return crawled_page

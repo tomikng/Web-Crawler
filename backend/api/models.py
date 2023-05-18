@@ -9,7 +9,6 @@ from webcrawler.tasks_helper import create_periodic_crawl_task
 from django_celery_beat.models import PeriodicTask
 
 
-
 class WebsiteRecord(models.Model):
     id = models.AutoField(primary_key=True)
 
@@ -63,7 +62,7 @@ class CrawledPage(models.Model):
     id = models.AutoField(primary_key=True)
 
     execution = models.ForeignKey(Execution, on_delete=models.CASCADE)
-    url = models.URLField(unique=True)
+    url = models.URLField()
     crawl_time = models.DateTimeField(auto_now_add=True)
     title = models.CharField(null=True, blank=True)
     links = models.ManyToManyField('self', blank=True)
@@ -80,8 +79,3 @@ class CrawledPage(models.Model):
 
     def __str__(self):
         return self.url
-
-
-
-
-
