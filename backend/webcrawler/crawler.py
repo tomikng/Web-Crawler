@@ -71,7 +71,7 @@ class Crawler:
             link = a_tag['href']
             absolute_link = urljoin(url, link)
             normalized_link = self.normalize_link(absolute_link)
-            if normalized_link and self.is_valid_link(normalized_link):  # Check if the link is valid
+            if normalized_link:  # Check if the link is valid
                 links.add(normalized_link)
         return links
 
@@ -112,7 +112,8 @@ class Crawler:
 
     def enqueue_valid_links(self, links, queue):
         for link in links:
-            queue.append(link)
+            if self.is_valid_link(link):
+                queue.append(link)
 
     def is_valid_link(self, link):
         boundary_regexp = self.website_record.boundary_regexp
