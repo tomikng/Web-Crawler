@@ -38,7 +38,6 @@ const processWebsiteRecords = async (records, sortBy) => {
         label: label,
         url: websiteRecord.url,
         periodicity: websiteRecord.periodicity,
-        status: record.status,
         tags: websiteRecord.tags,
         start_time: new Date(record.start_time).toLocaleString(),
         status: record.status

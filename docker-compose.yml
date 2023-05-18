@@ -9,31 +9,53 @@ services:
       - "8000:8000"
     image: django:django
     container_name: django_container
-    command: 'sh -c "cd backend && python manage.py runserver 0.0.0.0:8000"'
+    command: 'sh -c "cd backend && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"'
+    environment:
+      - DB_HOST=db
+      - DB_NAME=app
+      - DB_USER=postgres
+      - DB_PASS=postgres
+    depends_on:
+      - db
+   
 
   redis:
     image: redis:6.0
     container_name: redis_container
 
   celery_worker:
+    restart: always
     build: .
     image: django:django
     container_name: celery_worker_container
     command: 'sh -c "cd backend && celery -A backend worker -l info --pool=solo"'
     volumes:
       - ./backend:/django/backend
+    environment:
+      - DB_HOST=db
+      - DB_NAME=app
+      - DB_USER=postgres
+      - DB_PASS=postgres
     depends_on:
+      - db
       - django
       - redis
 
   celery_beat:
+    restart: always
     build: .
     image: django:django
     container_name: celery_beat_container
     command: 'sh -c "cd backend && celery -A backend beat -l info --scheduler django_celery_beat.schedulers.DatabaseScheduler"'
     volumes:
       - ./backend:/django/backend
+    environment:
+      - DB_HOST=db
+      - DB_NAME=app
+      - DB_USER=postgres
+      - DB_PASS=postgres
     depends_on:
+      - db
       - django
       - redis
 
@@ -46,7 +68,13 @@ services:
       - ./backend:/django/backend
     ports:
       - "5555:5555"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=app
+      - DB_USER=postgres
+      - DB_PASS=postgres
     depends_on:
+      - db
       - django
       - redis
 
@@ -62,3 +90,17 @@ services:
     container_name: react_container
     environment:
       - CHOKIDAR_USEPOLLING=true
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=app
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+  
+volumes:
+  pgdata:
