@@ -93,17 +93,16 @@ def get_execution(request, identifier):
     return Response(serializer.data)
 
 
-@swagger_auto_schema(method='POST', request_body=ExecutionSerializer)
+@swagger_auto_schema(method='POST')
 @api_view(['POST'])
-def create_execution(request):
+def create_execution(request, website_id):
     """
-    Create an execution.
+    Create an execution for the specified website.
     """
-    serializer = ExecutionSerializer(data=request.data)
-    if serializer.is_valid():
-        execution = serializer.save()
-        return Response({'success': True, 'execution': serializer.data})
-    return Response(serializer.errors, status=400)
+    website = get_object_or_404(WebsiteRecord, pk=website_id)
+    execution = Execution.objects.create(website_record=website)
+    serializer = ExecutionSerializer(execution)
+    return Response({'success': True, 'execution': serializer.data})
 
 
 @swagger_auto_schema(method='PUT', request_body=ExecutionSerializer)
