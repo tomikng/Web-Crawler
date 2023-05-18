@@ -1,5 +1,5 @@
 /.venv/
 /venv/
-/backend/api/__pycache__/
-/backend/backend/__pycache__/
-/backend/webcrawler/__pycache__/
+/api/__pycache__/
+/backend/__pycache__/
+/webcrawler/__pycache__/
