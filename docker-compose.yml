@@ -28,7 +28,7 @@ services:
     build: .
     image: django:django
     container_name: celery_worker_container
-    command: 'sh -c "cd backend && celery -A backend worker -l info --pool=solo"'
+    command: 'sh -c "cd backend && celery -A backend worker -l info"'
     volumes:
       - ./backend:/django/backend
     environment:
