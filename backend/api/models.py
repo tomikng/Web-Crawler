@@ -58,7 +58,7 @@ class CrawledPage(models.Model):
     execution = models.ForeignKey(Execution, on_delete=models.CASCADE)
     url = models.URLField(unique=True)
     crawl_time = models.DateTimeField(auto_now_add=True)
-    title = models.CharField(max_length=200, null=True, blank=True)
+    title = models.CharField(null=True, blank=True)
     links = models.ManyToManyField('self', blank=True)
 
     def set_links(self, links, execution):
