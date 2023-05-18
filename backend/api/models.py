@@ -6,6 +6,9 @@ from django.utils.datetime_safe import datetime
 
 from webcrawler.tasks_helper import create_periodic_crawl_task
 
+from django_celery_beat.models import PeriodicTask
+
+
 
 class WebsiteRecord(models.Model):
     id = models.AutoField(primary_key=True)
@@ -28,6 +31,10 @@ class WebsiteRecord(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         create_periodic_crawl_task(self)
+
+    def delete(self, *args, **kwargs):
+        PeriodicTask.objects.filter(name=f'crawl_website_{self.label}').delete()
+        super().delete(*args, **kwargs)
 
 
 class Execution(models.Model):
