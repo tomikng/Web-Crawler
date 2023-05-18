@@ -5,6 +5,7 @@ import axios from 'axios';
 
 const base_url = 'http://127.0.0.1:8000/api';
 
+
 const fetchExecutions = async () => {
   try {
     const response = await axios.get(`${base_url}/executions/`);
@@ -16,7 +17,7 @@ const fetchExecutions = async () => {
   }
 };
 
-const fetchWebsiteRecords = async (id) => {
+const fetchWebsiteRecord = async (id) => {
   try {
     const response = await axios.get(`${base_url}/website_records/${id}/`);
     return response.data;
@@ -26,10 +27,20 @@ const fetchWebsiteRecords = async (id) => {
   }
 };
 
+const fetchWebsiteRecords = async () => {
+  try {
+    const response = await axios.get(`${base_url}/website_records/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching website records:', error);
+    return null;
+  }
+}
+
 const processWebsiteRecords = async (records) => {
   const processedRecords = [];
   for (const record of records) {
-    const websiteRecord = await fetchWebsiteRecords(record.website_record);
+    const websiteRecord = await fetchWebsiteRecord(record.website_record);
     if (websiteRecord) {
       const { label } = websiteRecord;
       const start_time = record.start_time ? new Date(record.start_time).toLocaleString() : 'None';
@@ -55,6 +66,9 @@ const Executions = () => {
   const [filterLabel, setFilterLabel] = useState('');
   const [uniqueLabels, setUniqueLabels] = useState([]);
 
+  const [websiteRecords, setWebsiteRecords] = useState([]);
+  const [selectedValueDialog, setSelectedValueDialog] = useState('none');
+
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 10;
 
@@ -69,6 +83,17 @@ const Executions = () => {
   }, [filterLabel, records]);
 
 
+  const createNewExecution = async () => {
+    const id = selectedValueDialog;
+    try {
+      await axios.post(`${base_url}/executions/create/${id}/`);
+      // Perform any additional actions after successful deletion
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error('Error creating execution:', error);
+    }
+  }
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,8 +101,11 @@ const Executions = () => {
       if (executionData) {
         const processedData = await processWebsiteRecords(executionData);
         setRecords(processedData);
-
-        // extract unique labels
+        
+        const website_records = await fetchWebsiteRecords();
+        console.log(website_records);
+        setWebsiteRecords(website_records);
+         // extract unique labels
         const labels = [...new Set(processedData.map(record => record.label))];
         setUniqueLabels(labels);
       }
@@ -133,7 +161,18 @@ const Executions = () => {
         <div className="dialog">
           <div className="dialog-content">
             <h3>Create New Execution</h3>
-            {/* Add your form or additional content here */}
+            {/* here */}
+            <select onChange={(e) => setSelectedValueDialog(e.target.value)}>
+              <option value="none">None</option>
+              {websiteRecords.map((websiteRecord) => (
+                <option key={websiteRecord.id} value={websiteRecord.id}>
+                  {websiteRecord.id + " - " + websiteRecord.label}
+                </option>
+              ))}
+            </select>
+
+            <button onClick={() => createNewExecution()}>Create</button>
+
             <button onClick={() => setIsDialogOpen(false)}>Close</button>
           </div>
         </div>
