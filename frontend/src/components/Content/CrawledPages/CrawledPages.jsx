@@ -6,6 +6,7 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import './CrawledPages.css';
@@ -18,8 +19,23 @@ const initialNodes = [
 ];
 
 const initialEdges = [
-  { id: 'e1-2', source: '1', target: '2' },
-  { id: 'e1-3', source: '1', target: '3' },
+  { 
+    id: 'e1-2', 
+    source: '1', 
+    target: '2',  
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+    }, 
+  },
+
+  { 
+    id: 'e1-3',
+    source: '1',
+    target: '3',
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+    }, 
+  },
 ];
 
 const nodeTypes = {
