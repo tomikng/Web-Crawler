@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import './WebsiteRecordsDetail.css';
+import { useNavigate } from 'react-router-dom';
 
 const BASE_URL = 'http://127.0.0.1:8000/api/website_records';
 
 const WebsiteRecordsDetail = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [websiteRecord, setWebsiteRecord] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -19,7 +21,6 @@ const WebsiteRecordsDetail = () => {
         const response = await axios.get(`${BASE_URL}/${id}/`);
         const data = response.data;
 
-        console.log(data);
         setTags(data.tags.split(',').map((tag) => tag.trim()));
 
         setWebsiteRecord(data);
@@ -36,6 +37,8 @@ const WebsiteRecordsDetail = () => {
     try {
       await axios.delete(`${BASE_URL}/delete/${id}/`);
       // Perform any additional actions after successful deletion
+      alert('Website Record was deleted successfully');
+      navigate('/websiteRecords');
     } catch (error) {
       console.error('Error deleting website record:', error);
     }
@@ -76,8 +79,12 @@ const WebsiteRecordsDetail = () => {
     try {
       const response = await axios.put(`${BASE_URL}/update/${id}/`, updatedRecordValues);
       const updatedRecord = response.data;
-      console.log('Updated Record:', updatedRecord);
       // Perform any additional actions after successful update
+      alert('Website Record Details successfully updated');
+      setEditMode(false);
+      navigate(`/website_records/${id}`);
+
+      setWebsiteRecord(updatedRecord.website_record);
     } catch (error) {
       console.error('Error updating record:', error);
     }
