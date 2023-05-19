@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import './Crawl.css';
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 const Crawl = () => {
-
+  const navigate = useNavigate();
   const [tags, setTags] = useState([]);
   const [tagInputValue, setTagInputValue] = useState('');
 
@@ -35,6 +36,8 @@ const Crawl = () => {
       .then(response => {
         console.log('Data saved successfully:', response.data);
         // Handle successful response here
+        alert('New crawl saved successfully');
+        navigate('/websiteRecords');
       })
       .catch(error => {
         console.error('Error:', error);
