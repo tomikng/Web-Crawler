@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import './ExecutionDetails.css'; // Import the CSS file for styling
+import './ExecutionDetails.css'; 
+
+import { useNavigate } from 'react-router-dom';
 
 const ExecutionDetails = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [execution, setExecution] = useState(null);
 
@@ -27,13 +30,12 @@ const ExecutionDetails = () => {
     try {
       await axios.delete(`${BASE_URL}/${id}/`);
       // Perform any additional actions after successful deletion
+      alert('Execution was deleted successfully');
+      navigate('/executions');
+
     } catch (error) {
       console.error('Error deleting execution:', error);
     }
-  };
-
-  const handleEdit = () => {
-    // Implement the logic for editing the execution details
   };
 
   return (
@@ -61,11 +63,8 @@ const ExecutionDetails = () => {
           </div>
 
           <div className="execution-details__actions">
-            <button className="execution-details__button" onClick={handleDelete}>
+            <button className="execution-details__button delete-button" onClick={handleDelete}>
               Delete
-            </button>
-            <button className="execution-details__button" onClick={handleEdit}>
-              Edit
             </button>
           </div>
         </div>
