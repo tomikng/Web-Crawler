@@ -18,9 +18,6 @@ const fetchExecutions = async () => {
 const fetchWebsiteRecords = async (id) => {
   try {
     const response = await axios.get(`${base_url}/website_records/${id}/`);
-
-    console.log(response.data);
-
     return response.data;
   } catch (error) {
     console.error('Error fetching website records:', error);
@@ -33,9 +30,6 @@ const processWebsiteRecords = async (records, sortBy) => {
 
   for (const record of records) {
     const websiteRecord = await fetchWebsiteRecords(record.website_record);
-
-    console.log(websiteRecord);
-
     if (websiteRecord) {
       const { id, label, url, periodicity, tags } = websiteRecord;
       const startTime = new Date(record.start_time).toLocaleString();
@@ -91,7 +85,6 @@ const WebsiteRecords = () => {
       const executionData = await fetchExecutions();
       if (executionData) {
         const processedData = await processWebsiteRecords(executionData, sortedBy);
-        console.log(processedData);
         setWebsiteRecords(processedData);
       }
     };
