@@ -21,7 +21,9 @@ const WebsiteRecordsDetail = () => {
         const response = await axios.get(`${BASE_URL}/${id}/`);
         const data = response.data;
 
-        setTags(data.tags.split(',').map((tag) => tag.trim()));
+        console.log(data);
+
+        setTags(data.tags);
 
         setWebsiteRecord(data);
         setUpdatedRecord(data);
@@ -73,7 +75,7 @@ const WebsiteRecordsDetail = () => {
       periodicity: updatedRecord.periodicity,
       boundary_regexp: updatedRecord.boundary_regexp,
       active: updatedRecord.active,
-      tags: tags.join(',')
+      tags: tags
     };
 
     try {
@@ -212,7 +214,7 @@ const WebsiteRecordsDetail = () => {
                   </div>
                 </>
               ) : (
-                websiteRecord.tags
+                websiteRecord.tags.join(', ')
               )}
             </div>
           </div>
