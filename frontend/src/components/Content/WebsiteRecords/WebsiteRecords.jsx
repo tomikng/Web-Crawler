@@ -30,7 +30,6 @@ const processWebsiteRecords = async (records, sortBy) => {
 
   for (const record of records) {
     const websiteRecord = await fetchWebsiteRecords(record.website_record);
-
     if (websiteRecord) {
       const { id, label, url, periodicity, tags } = websiteRecord;
       const startTime = new Date(record.start_time).toLocaleString();
@@ -77,7 +76,7 @@ const WebsiteRecords = () => {
 
   const [filterLabel, setFilterLabel] = useState('');
   const [filterUrl, setFilterUrl] = useState('');
-  const [filterTags, setFilterTags] = useState('');
+  const [filterTags, setFilterTags] = useState([]);
 
   const [displayedRecords, setDisplayedRecords] = useState([]);
 
@@ -86,7 +85,6 @@ const WebsiteRecords = () => {
       const executionData = await fetchExecutions();
       if (executionData) {
         const processedData = await processWebsiteRecords(executionData, sortedBy);
-        console.log(processedData);
         setWebsiteRecords(processedData);
       }
     };
@@ -116,7 +114,7 @@ const WebsiteRecords = () => {
     return records.filter((record) => {
       const labelMatch = record.label.toLowerCase().includes(filterLabel.toLowerCase());
       const urlMatch = record.url.toLowerCase().includes(filterUrl.toLowerCase());
-      const tagsMatch = record.tags.toLowerCase().includes(filterTags.toLowerCase());
+      const tagsMatch = filterTags.every((tag) => record.tags.includes(tag.toLowerCase()));
       return labelMatch && urlMatch && tagsMatch;
     });
   };
@@ -141,7 +139,8 @@ const WebsiteRecords = () => {
   };
 
   const handleFilterTagsChange = (event) => {
-    setFilterTags(event.target.value);
+    const tags = event.target.value.split(",").map((tag) => tag.trim());
+    setFilterTags(tags);
   };
 
   // currentRecords = applyFilters(websiteRecords);
@@ -181,7 +180,7 @@ const WebsiteRecords = () => {
               </td>	
               <td>{websiteRecord.url}</td>	
               <td>{websiteRecord.periodicity}</td>	
-              <td>{websiteRecord.tags}</td>	
+              <td>{websiteRecord.tags.join(', ')}</td>	
               <td>{websiteRecord.start_time}</td>	
               <td>{websiteRecord.status}</td>	
             </tr>	

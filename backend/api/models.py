@@ -8,10 +8,11 @@ from webcrawler.tasks_helper import create_periodic_crawl_task
 
 from django_celery_beat.models import PeriodicTask
 
+from django.contrib.postgres.fields import ArrayField
+
 
 class WebsiteRecord(models.Model):
     id = models.AutoField(primary_key=True)
-
     url = models.URLField()
     boundary_regexp = models.CharField(max_length=256)
     PERIODICITY_CHOICES = [
@@ -22,7 +23,7 @@ class WebsiteRecord(models.Model):
     periodicity = models.CharField(max_length=10, choices=PERIODICITY_CHOICES)
     label = models.CharField(max_length=100)
     active = models.BooleanField(default=True)
-    tags = models.TextField(blank=True)
+    tags = ArrayField(models.CharField(max_length=100), blank=True)
 
     def __str__(self):
         return self.label

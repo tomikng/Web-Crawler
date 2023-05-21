@@ -119,7 +119,7 @@ const Crawl = () => {
       periodicity: periodicity,
       label: label,
       active: active,
-      tags: tags.join(",")
+      tags: tags
     };
 
     saveWebsiteRecord(data);
