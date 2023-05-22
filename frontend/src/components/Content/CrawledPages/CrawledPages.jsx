@@ -54,14 +54,30 @@ const CrawledPages = () => {
           }
         });
 
-        const fetchedNodes = response.data.data.nodes.map((node, index) => ({
+        console.log(response.data);
+
+        const data = response.data.data;
+
+        const fetchedNodes = data.nodes.map((node, index) => ({
           id: String(index),
           type: 'customNode',
-          position: { x: 0, y: 0 + index*50 },
+          position: { x: 0, y: 0 + index * 50 },
           data: { label: node.title, url: node.url }
         }));
 
+        const fetchedEdges = data.nodes.map((node, index) => ({
+          id: String(index),
+          source: node.owner.identifier, 
+          target: String(index),  
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          }, 
+        }));
+
         setNodes(fetchedNodes);
+
+        setEdges(fetchedEdges);
+
       } catch (error) {
         console.error(error);
       }
