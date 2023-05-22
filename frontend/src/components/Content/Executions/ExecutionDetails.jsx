@@ -28,7 +28,7 @@ const ExecutionDetails = () => {
 
   const handleDelete = async () => {
     try {
-      await axios.delete(`${BASE_URL}/${id}/`);
+      await axios.delete(`${BASE_URL}/delete/${id}/`);
       // Perform any additional actions after successful deletion
       alert('Execution was deleted successfully');
       navigate('/executions');

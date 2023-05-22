@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -11,6 +11,9 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import './CrawledPages.css';
 import CustomNodeComponent from './CustomNodeComponent';
+import axios from 'axios';
+
+const BASE_URL = "http://127.0.0.1:8000/api/graphql/";
 
 const initialNodes = [
   { id: '1', type: 'customNode', position: { x: 0, y: 0 }, data: { label: 'xxx', url: 'https://www.matfyz.cz/kontakt' } },
@@ -45,6 +48,52 @@ const nodeTypes = {
 const CrawledPages = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+          const query = `
+            query
+              {
+                nodes {
+                  url
+                  title
+                  crawlTime
+                  links{
+                    url
+                  }
+                  owner{
+                    identifier
+                    label
+                    url
+                  }
+                }
+              }
+        `;
+
+        axios.post(BASE_URL, {
+          query: query
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          // Handle the response
+          console.log(response.data);
+        })
+        .catch(error => {
+          // Handle any errors
+          console.error(error);
+        });
+    };
+
+
+   
+
+    fetchData();
+  }, []); 
+
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
