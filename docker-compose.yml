@@ -9,7 +9,7 @@ services:
       - "8000:8000"
     image: django:django
     container_name: django_container
-    command: 'sh -c "cd backend && python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"'
+    command: 'sh -c "cd backend && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"'
     environment:
       - DB_HOST=db
       - DB_NAME=app

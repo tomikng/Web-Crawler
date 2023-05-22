@@ -1,6 +1,6 @@
 import graphene
 from graphene_django import DjangoObjectType
-from .models import WebsiteRecord, CrawledPage
+from .models import WebsiteRecord, CrawledPage, Link
 from django.utils import timezone
 
 
@@ -13,19 +13,30 @@ class WebPage(DjangoObjectType):
         fields = ("label", "url", "tags", "active")
 
 
+class LinkNode(DjangoObjectType):
+    class Meta:
+        model = Link
+        fields = ("from_page", "to_page")
+
+
 class Node(DjangoObjectType):
     class Meta:
         model = CrawledPage
-        fields = ("title", "url", "crawl_time", "links")
+        fields = ("title", "url", "crawl_time")
 
     owner = graphene.Field(WebPage, required=True)
     crawl_time = graphene.String()
+    links = graphene.List(lambda: Node)
 
     def resolve_owner(self, info):
         return self.execution.website_record
 
     def resolve_crawl_time(self, info):
         return str(self.crawl_time)
+
+    def resolve_links(self, info):
+        return [link.to_page for link in self.links_from.all()]
+
 
 
 class Query(graphene.ObjectType):
