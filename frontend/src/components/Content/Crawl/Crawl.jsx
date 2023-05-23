@@ -41,6 +41,7 @@ const Crawl = () => {
       })
       .catch(error => {
         console.error('Error:', error);
+        alert(error.response.data.url[0]);
         // Handle error here
       });
   };
@@ -59,9 +60,9 @@ const Crawl = () => {
     }
 
     if (!isValidUrl(url)) {
-      // alert('Please enter a valid URL');
-      // urlInput.focus();
-      // return false;
+      alert('Please enter a valid URL');
+      urlInput.focus();
+      return false;
     }
 
     if (regex === '') {
@@ -89,7 +90,14 @@ const Crawl = () => {
   };
 
   const isValidUrl = (url) => {
-    const urlRegex = /^(https?:\/\/)?([\w.-]+)(\.[\w.-]+)\/?$/;
+    const urlRegex = new RegExp('^(https?:\\/\\/)?' + // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|' + // domain name and extension
+    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+    '(\\:\\d+)?' + // port
+    '(\\/[-a-z\\d%_.~+]*)*' + // path
+    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+    '(\\#[-a-z\\d_]*)?$', 'i');
+
     return urlRegex.test(url);
   };
 
