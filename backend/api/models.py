@@ -13,7 +13,9 @@ from django.contrib.postgres.fields import ArrayField
 
 class WebsiteRecord(models.Model):
     id = models.AutoField(primary_key=True)
-    url = models.URLField()
+    url = models.TextField(max_length=256, unique=True,error_messages={
+            'unique': "This URL is already in use. Please use another URL."
+        })
     boundary_regexp = models.TextField(max_length=256)
     PERIODICITY_CHOICES = [
         ('minute', 'Minute'),
