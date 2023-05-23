@@ -15,85 +15,76 @@ import axios from 'axios';
 
 const BASE_URL = "http://127.0.0.1:8000/api/graphql/";
 
-const initialNodes = [
-  { id: '1', type: 'customNode', position: { x: 0, y: 0 }, data: { label: 'xxx', url: 'https://www.matfyz.cz/kontakt' } },
-  { id: '2', type: 'customNode', position: { x: 0, y: 100 }, data: { label: '2', url: 'https://www.googletagmanager.com' } },
-  { id: '3', type: 'customNode', position: { x: 0, y: 100 }, data: { label: '2', url: 'https://www.googletagmanager.com' } },
-];
-
-const initialEdges = [
-  { 
-    id: 'e1-2', 
-    source: '1', 
-    target: '2',  
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    }, 
-  },
-
-  { 
-    id: 'e1-3',
-    source: '1',
-    target: '3',
-    markerEnd: {
-      type: MarkerType.ArrowClosed,
-    }, 
-  },
-];
+let initialEdges = [];
 
 const nodeTypes = {
   customNode: CustomNodeComponent,
 };
 
 const CrawledPages = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
 
   useEffect(() => {
     const fetchData = async () => {
-          const query = `
-            query
-              {
-                nodes {
-                  url
-                  title
-                  crawlTime
-                  links{
-                    url
-                  }
-                  owner{
-                    identifier
-                    label
-                    url
-                  }
-                }
-              }
-        `;
+      const query = `
+        query {
+          nodes {
+            url
+            title
+            crawlTime
+            links {
+              url
+            }
+            owner {
+              identifier
+              label
+              url
+            }
+          }
+        }
+      `;
 
-        axios.post(BASE_URL, {
+      try {
+        const response = await axios.post(BASE_URL, {
           query: query
         }, {
           headers: {
             'Content-Type': 'application/json'
           }
-        })
-        .then(response => {
-          // Handle the response
-          console.log(response.data);
-        })
-        .catch(error => {
-          // Handle any errors
-          console.error(error);
         });
+
+        console.log(response.data);
+
+        const data = response.data.data;
+
+        const fetchedNodes = data.nodes.map((node, index) => ({
+          id: String(index),
+          type: 'customNode',
+          position: { x: 0, y: 0 + index * 50 },
+          data: { label: node.title, url: node.url }
+        }));
+
+        const fetchedEdges = data.nodes.map((node, index) => ({
+          id: String(index),
+          source: node.owner.identifier, 
+          target: String(index),  
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          }, 
+        }));
+
+        setNodes(fetchedNodes);
+
+        setEdges(fetchedEdges);
+
+      } catch (error) {
+        console.error(error);
+      }
     };
 
-
-   
-
     fetchData();
-  }, []); 
-
+  }, [setNodes]);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
