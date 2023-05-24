@@ -22,7 +22,12 @@ const CrawledPages = () => {
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  const [hashMap, setHashMap] = useState(new Map()); // Use Map for the hashmap
+  const [viewMode, setViewMode] = useState("website");
+  const [hashMap, setHashMap] = useState(new Map());
+
+  const handleViewModeChange = () => {
+    setViewMode(viewMode === "website" ? "domain" : "website");
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,7 +45,6 @@ const CrawledPages = () => {
             }
           }
         }
-
       `;
 
       try {
@@ -60,45 +64,115 @@ const CrawledPages = () => {
         let nodeTree = {};
         let maxDepth = 0;
 
-        // Construct HashMap and nodeTree
-        filteredNodesData.forEach((node, index) => {
-          const nodeId = String(index);
-          const dictionaryValue = node.url;
+        if (viewMode === "website") {
+          // Website view mode
+          // Construct HashMap and nodeTree
+          filteredNodesData.forEach((node, index) => {
+            const nodeId = String(index);
+            const dictionaryValue = node.url;
 
-          // Update hashmap with {url: id}
-          newHashMap.set(dictionaryValue, nodeId);
+            // Update hashmap with {url: id}
+            newHashMap.set(dictionaryValue, nodeId);
 
-          // Update nodeTree with {id: child_ids}
-          nodeTree[nodeId] = node.links.map(link => newHashMap.get(link.url)).filter(id => id !== undefined);
-          maxDepth = Math.max(maxDepth, nodeTree[nodeId].length);
-        });
-
-        // Update HashMap state
-        setHashMap(newHashMap);
-
-        console.log(filteredNodesData)
-
-        // Construct nodes with positions based on depth
-        Object.entries(nodeTree).forEach(([nodeId, children], index) => {
-          fetchedNodes.push({
-            id: nodeId,
-            type: 'customNode',
-            position: { x: children.length * (1000 / (maxDepth + 1)), y: index * 100 },
-            data: { label: filteredNodesData[index].title, url: filteredNodesData[index].url, owner: filteredNodesData[index].owner }
+            // Update nodeTree with {id: child_ids}
+            nodeTree[nodeId] = node.links.map(link => newHashMap.get(link.url)).filter(id => id !== undefined);
+            maxDepth = Math.max(maxDepth, nodeTree[nodeId].length);
           });
-        });
 
-        // Build edges
-        Object.entries(nodeTree).forEach(([sourceId, children]) => {
-          children.forEach(targetId => {
-            fetchedEdges.push({
-              id: 'e' + sourceId + '-' + targetId,
-              source: sourceId,
-              target: targetId,
-              arrowHeadType: MarkerType.ArrowClosed,
+          // Update HashMap state
+          setHashMap(newHashMap);
+
+          console.log(filteredNodesData)
+
+          // Construct nodes with positions based on depth
+          Object.entries(nodeTree).forEach(([nodeId, children], index) => {
+            fetchedNodes.push({
+              id: nodeId,
+              type: 'customNode',
+              position: { x: children.length * (1000 / (maxDepth + 1)), y: index * 100 },
+              data: { label: filteredNodesData[index].title, url: filteredNodesData[index].url, owner: filteredNodesData[index].owner }
             });
           });
-        });
+
+          // Build edges
+          Object.entries(nodeTree).forEach(([sourceId, children]) => {
+            children.forEach(targetId => {
+              fetchedEdges.push({
+                id: `e${sourceId}-${targetId}-${fetchedEdges.length}`,
+                source: sourceId,
+                target: targetId,
+                arrowHeadType: MarkerType.ArrowClosed,
+              });
+            });
+          });
+
+
+        } else if (viewMode === "domain") {
+          // Domain view mode
+          // Group by domain
+          let domainNodes = {};
+          filteredNodesData.forEach((node, index) => {
+            if(node.url){
+              try {
+                const urlObj = new URL(node.url);
+                const domain = urlObj.hostname;
+                if (!domainNodes[domain]) {
+                  domainNodes[domain] = {
+                    id: domain, // use the domain as id to ensure uniqueness
+                    url: domain,
+                    links: [],
+                    title: domain,
+                    owner: node.owner
+                  }
+                }
+                domainNodes[domain].links = [
+                  ...new Set([...domainNodes[domain].links, // use Set to remove duplicates
+                    ...node.links.map(link => {
+                      const linkDomain = new URL(link.url).hostname;
+                      if (!domainNodes[linkDomain]) {
+                        // add new domain node if not exists
+                        domainNodes[linkDomain] = {
+                          id: linkDomain,
+                          url: linkDomain,
+                          links: [],
+                          title: linkDomain,
+                          owner: node.owner
+                        }
+                      }
+                      return linkDomain;
+                    })])
+                ];
+              } catch (error) {
+                console.error(`Invalid URL: ${node.url}`);
+              }
+            }
+          });
+
+          // Sort domains alphabetically for better layout
+          const sortedDomains = Object.keys(domainNodes).sort();
+
+          // Build nodes and edges
+          sortedDomains.forEach((domain, index) => {
+            const node = domainNodes[domain];
+            fetchedNodes.push({
+              id: node.id,
+              type: 'customNode',
+              position: { x: 100 + index * 150, y: 100 + node.links.length * 50 }, // adjust x and y positions for better layout
+              data: { label: node.title, url: node.url, owner: node.owner }
+            });
+
+            node.links.forEach((linkDomain, linkIndex) => {
+              if (domainNodes[linkDomain]) {
+                fetchedEdges.push({
+                  id: `e${node.id}-${domainNodes[linkDomain].id}-${linkIndex}`,
+                  source: node.id,
+                  target: domainNodes[linkDomain].id,
+                  arrowHeadType: MarkerType.ArrowClosed,
+                });
+              }
+            });
+          });
+        }
 
         setNodes(fetchedNodes);
         setEdges(fetchedEdges);
@@ -108,11 +182,8 @@ const CrawledPages = () => {
       }
     };
 
-
-
-
     fetchData();
-  }, [setNodes]);
+  }, [website, viewMode, setNodes, setEdges, setHashMap]);
 
   const onConnect = (params) => setEdges((eds) => [...eds, params]);
 
@@ -128,6 +199,7 @@ const CrawledPages = () => {
 
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
+      <button onClick={handleViewModeChange}>Switch to {viewMode === "website" ? "domain" : "website"} view</button>
       <ReactFlow
         nodes={nodes}
         edges={edges}
