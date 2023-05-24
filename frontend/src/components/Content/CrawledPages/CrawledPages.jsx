@@ -9,6 +9,7 @@ import 'reactflow/dist/style.css';
 import './CrawledPages.css';
 import CustomNodeComponent from './CustomNodeComponent';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
 const BASE_URL = "http://127.0.0.1:8000/api/graphql/";
 
@@ -17,6 +18,8 @@ const nodeTypes = {
 };
 
 const CrawledPages = () => {
+  const { website } = useParams();
+
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const [hashMap, setHashMap] = useState(new Map()); // Use Map for the hashmap
@@ -25,7 +28,7 @@ const CrawledPages = () => {
     const fetchData = async () => {
       const query = `
         query {
-          nodes {
+           nodes(webPages: "${website}") {
             url
             title
             links {
