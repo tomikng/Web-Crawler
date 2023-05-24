@@ -42,6 +42,7 @@ const CrawledPages = () => {
               title
             }
             owner {
+              identifier
               regexp
             }
           }
@@ -97,7 +98,7 @@ const CrawledPages = () => {
                 url: filteredNodesData[index].url, 
                 links: filteredNodesData[index].links,
                 crawlTime: filteredNodesData[index].crawlTime,
-                owner: filteredNodesData[index].owner   
+                owner: filteredNodesData[index].owner,
               }
             });
           });
