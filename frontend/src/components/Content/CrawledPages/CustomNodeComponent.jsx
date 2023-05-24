@@ -12,12 +12,12 @@ const CustomNodeComponent = ({ data }) => {
   const handleClick = () => {
     console.log(data.id);
     // Perform any desired operations with the node information
-    navigate('/nodeDetail/' + data.id, { state: { data } });
+    navigate('/nodeDetail/' + data.id, { state: { data, nodeStyle } });
   };
 
 
   return (
-    <div className={nodeStyle} onClick={handleClick}>
+    <div className={nodeStyle} onClick={() => handleClick(nodeStyle)}>
       <div className='labelName'>{data.label}</div>
       <div className='url'>{data.url}</div>
       <Handle type="target" position="right" style={{ background: '#555' }}/>
