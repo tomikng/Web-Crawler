@@ -72,7 +72,7 @@ class CrawledPage(models.Model):
         for url in links:
             defaults = {'execution': execution, 'crawl_time': make_aware(datetime.now())}
             crawled_page, created = CrawledPage.objects.update_or_create(url=url, defaults=defaults)
-            Link.objects.create(from_page=self, to_page=crawled_page)
+            Link.objects.get_or_create(from_page=self, to_page=crawled_page)
 
     def get_links(self):
         return [link.to_page for link in self.links_from.all()]
@@ -84,4 +84,7 @@ class CrawledPage(models.Model):
 class Link(models.Model):
     from_page = models.ForeignKey(CrawledPage, related_name='links_from', on_delete=models.CASCADE)
     to_page = models.ForeignKey(CrawledPage, related_name='links_to', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('from_page', 'to_page')
 
