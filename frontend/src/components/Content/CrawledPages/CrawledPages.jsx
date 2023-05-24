@@ -175,6 +175,32 @@ const CrawledPages = () => {
         const data = await fetchData(website);
         const filteredNodesData = data.nodes;
 
+        // Rest of the code omitted for brevity
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    // Update immediately
+    loadGraph();
+
+    let intervalId;
+    if (mode === "live") {
+      // Update periodically if in live mode
+      intervalId = setInterval(loadGraph, 1000); // Adjust this to the desired refresh rate
+    }
+
+    // Clear interval when mode or website changes
+    return () => clearInterval(intervalId);
+  }, [website, mode, viewMode]); // Added mode to dependencies
+
+
+  useEffect(() => {
+    const loadGraph = async () => {
+      try {
+        const data = await fetchData(website);
+        const filteredNodesData = data.nodes;
+
         if (viewMode === "website") {
           const { fetchedNodes, fetchedEdges, newHashMap } = constructWebsiteView(filteredNodesData);
           setNodes(fetchedNodes);
@@ -198,6 +224,7 @@ const CrawledPages = () => {
   return (
     <div className="graph-container">
       <button onClick={handleViewModeChange}>Switch to {viewMode === "website" ? "domain" : "website"} view</button>
+      <button onClick={handleModeChange}>Switch to {mode === "static" ? "live" : "static"} mode</button>
       <ReactFlow
         nodes={nodes}
         edges={edges}
