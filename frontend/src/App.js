@@ -8,6 +8,7 @@ import CrawledPages from './components/Content/CrawledPages/CrawledPages';
 import Executions from './components/Content/Executions/Executions';
 import ExecutionDetails from './components/Content/Executions/ExecutionDetails';
 import WebsiteRecordsDetail from './components/Content/WebsiteRecords/WebsiteRecordsDetail';
+import SelectWebsite from "./components/Content/CrawledPages/SelectWebsite";
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
           <Route path="/" element={<Crawl />} />
           <Route path="/websiteRecords" element={<WebsiteRecords />} />
           <Route path="/website_records/:id" element={<WebsiteRecordsDetail />} />
-          <Route path="/crawledPages" element={<CrawledPages />} />
+          <Route path="/selectWebsite" element={<SelectWebsite />} />
+          <Route path="/crawledPages/:website" element={<CrawledPages />} />
           <Route path="/executions" element={<Executions />} />
           <Route path="/executions/:id" element={<ExecutionDetails />} />
         </Routes>
