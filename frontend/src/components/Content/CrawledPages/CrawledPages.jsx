@@ -1,11 +1,8 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
   Background,
-  useNodesState,
-  useEdgesState,
-  addEdge,
   MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
@@ -15,16 +12,13 @@ import axios from 'axios';
 
 const BASE_URL = "http://127.0.0.1:8000/api/graphql/";
 
-let initialEdges = [];
-
 const nodeTypes = {
   customNode: CustomNodeComponent,
 };
 
 const CrawledPages = () => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
   const [hashMap, setHashMap] = useState(new Map()); // Use Map for the hashmap
 
   useEffect(() => {
@@ -34,17 +28,16 @@ const CrawledPages = () => {
           nodes {
             url
             title
-            crawlTime
             links {
               url
+              title
             }
             owner {
-              identifier
-              label
-              url
+              regexp
             }
           }
         }
+
       `;
 
       try {
@@ -57,69 +50,68 @@ const CrawledPages = () => {
         });
 
         const data = response.data.data;
-
         const filteredNodesData = data.nodes;
+        let fetchedEdges = [];
+        let fetchedNodes = [];
+        let newHashMap = new Map();
+        let nodeTree = {};
+        let maxDepth = 0;
 
-        const fetchedNodes = filteredNodesData.map((node, index) => {
+        // Construct HashMap and nodeTree
+        filteredNodesData.forEach((node, index) => {
           const nodeId = String(index);
           const dictionaryValue = node.url;
 
-          // Update hashmap with {id: node.url}
-          setHashMap(prevHashMap => new Map(prevHashMap).set(dictionaryValue, nodeId));
+          // Update hashmap with {url: id}
+          newHashMap.set(dictionaryValue, nodeId);
 
-          return {
-            id: nodeId,
-            type: 'customNode',
-            position: { x: 0, y: 0 + index * 50 },
-            data: { label: node.title, url: node.url }
-          };
+          // Update nodeTree with {id: child_ids}
+          nodeTree[nodeId] = node.links.map(link => newHashMap.get(link.url)).filter(id => id !== undefined);
+          maxDepth = Math.max(maxDepth, nodeTree[nodeId].length);
         });
 
-        const fetchedEdges = data.nodes.map((node, index) => {
+        // Update HashMap state
+        setHashMap(newHashMap);
 
+        console.log(filteredNodesData)
 
+        // Construct nodes with positions based on depth
+        Object.entries(nodeTree).forEach(([nodeId, children], index) => {
+          fetchedNodes.push({
+            id: nodeId,
+            type: 'customNode',
+            position: { x: children.length * (1000 / (maxDepth + 1)), y: index * 100 },
+            data: { label: filteredNodesData[index].title, url: filteredNodesData[index].url, owner: filteredNodesData[index].owner }
+          });
+        });
 
-          // console.log(node.links);
-          for(let i = 0; i < node.links.length; i++){
-
-            const targetNode = hashMap.get(node.links[i].url);
-
-            console.log(targetNode);
-
-             return{
-              id: String(index) + targetNode,
-              source: String(index),
-              target: targetNode,
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-              },
-            }
-          }
-
-          // return{
-          //   id: String(index),
-          //   source: node.owner.identifier,
-          //   target: String(index),
-          //   markerEnd: {
-          //     type: MarkerType.ArrowClosed,
-          //   },
-          // }
-
+        // Build edges
+        Object.entries(nodeTree).forEach(([sourceId, children]) => {
+          children.forEach(targetId => {
+            fetchedEdges.push({
+              id: 'e' + sourceId + '-' + targetId,
+              source: sourceId,
+              target: targetId,
+              arrowHeadType: MarkerType.ArrowClosed,
+            });
+          });
         });
 
         setNodes(fetchedNodes);
         setEdges(fetchedEdges);
-
 
       } catch (error) {
         console.error(error);
       }
     };
 
-    fetchData();
-  }, [setNodes, hashMap]);
 
-  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+
+    fetchData();
+  }, [setNodes]);
+
+  const onConnect = (params) => setEdges((eds) => [...eds, params]);
 
   const onClickHandle = (event) => {
     const nodeElement = event.target.closest('.react-flow__node');
@@ -136,8 +128,6 @@ const CrawledPages = () => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         onClick={onClickHandle}

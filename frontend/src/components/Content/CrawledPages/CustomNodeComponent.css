@@ -1,0 +1,31 @@
+.customNode {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  background: #f0f0f0;
+  border: 1px solid #888;
+  box-shadow: 2px 2px 2px rgba(0,0,0,0.2);
+}
+
+.customNode .labelName {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.customNode .url {
+  font-size: 14px;
+  color: #777;
+  text-align: center;
+  word-break: break-word;
+  max-width: 90%;
+}
+
+.customNode.matches {
+  border: 2px solid #008000;
+  background: #d0f0d0;
+}
