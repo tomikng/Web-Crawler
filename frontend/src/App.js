@@ -9,6 +9,7 @@ import Executions from './components/Content/Executions/Executions';
 import ExecutionDetails from './components/Content/Executions/ExecutionDetails';
 import WebsiteRecordsDetail from './components/Content/WebsiteRecords/WebsiteRecordsDetail';
 import SelectWebsite from "./components/Content/CrawledPages/SelectWebsite";
+import NodeDetail from './components/Content/NodeDetail/NodeDetail';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/crawledPages/:website" element={<CrawledPages />} />
           <Route path="/executions" element={<Executions />} />
           <Route path="/executions/:id" element={<ExecutionDetails />} />
+          <Route path="/nodeDetail/:id" element={<NodeDetail />} />
         </Routes>
       </Router>
     </div>

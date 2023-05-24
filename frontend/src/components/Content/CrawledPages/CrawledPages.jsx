@@ -90,7 +90,14 @@ const CrawledPages = () => {
               id: nodeId,
               type: 'customNode',
               position: { x: children.length * (1000 / (maxDepth + 1)), y: index * 100 },
-              data: { label: filteredNodesData[index].title, url: filteredNodesData[index].url, owner: filteredNodesData[index].owner }
+              data: { 
+                id: nodeId,
+                label: filteredNodesData[index].title, 
+                url: filteredNodesData[index].url, 
+                links: filteredNodesData[index].links,
+                crawlTime: filteredNodesData[index].crawlTime,
+                owner: filteredNodesData[index].owner   
+              }
             });
           });
 
@@ -187,16 +194,6 @@ const CrawledPages = () => {
 
   const onConnect = (params) => setEdges((eds) => [...eds, params]);
 
-  const onClickHandle = (event) => {
-    const nodeElement = event.target.closest('.react-flow__node');
-    if (nodeElement) {
-      const labelName = nodeElement.querySelector('.labelName').innerText;
-      const url = nodeElement.querySelector('.url').innerText;
-      console.log(labelName);
-      console.log(url);
-    }
-  };
-
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
       <button onClick={handleViewModeChange}>Switch to {viewMode === "website" ? "domain" : "website"} view</button>
@@ -205,7 +202,6 @@ const CrawledPages = () => {
         edges={edges}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
-        onClick={onClickHandle}
       >
         <Controls />
         <MiniMap />
