@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -24,6 +24,8 @@ const nodeTypes = {
 const CrawledPages = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const [hashMap, setHashMap] = useState(new Map()); // Use Map for the hashmap
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,29 +56,60 @@ const CrawledPages = () => {
           }
         });
 
-        console.log(response.data);
-
         const data = response.data.data;
 
-        const fetchedNodes = data.nodes.map((node, index) => ({
-          id: String(index),
-          type: 'customNode',
-          position: { x: 0, y: 0 + index * 50 },
-          data: { label: node.title, url: node.url }
-        }));
+        const filteredNodesData = data.nodes;
 
-        const fetchedEdges = data.nodes.map((node, index) => ({
-          id: String(index),
-          source: node.owner.identifier, 
-          target: String(index),  
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-          }, 
-        }));
+        const fetchedNodes = filteredNodesData.map((node, index) => {
+          const nodeId = String(index);
+          const dictionaryValue = node.url;
+
+          // Update hashmap with {id: node.url}
+          setHashMap(prevHashMap => new Map(prevHashMap).set(dictionaryValue, nodeId));
+
+          return {
+            id: nodeId,
+            type: 'customNode',
+            position: { x: 0, y: 0 + index * 50 },
+            data: { label: node.title, url: node.url }
+          };
+        });
+
+        const fetchedEdges = data.nodes.map((node, index) => {
+
+
+
+          // console.log(node.links);
+          for(let i = 0; i < node.links.length; i++){
+
+            const targetNode = hashMap.get(node.links[i].url);
+
+            console.log(targetNode);
+
+             return{
+              id: String(index) + targetNode,
+              source: String(index),
+              target: targetNode,
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+              },
+            }
+          }
+
+          // return{
+          //   id: String(index),
+          //   source: node.owner.identifier,
+          //   target: String(index),
+          //   markerEnd: {
+          //     type: MarkerType.ArrowClosed,
+          //   },
+          // }
+
+        });
 
         setNodes(fetchedNodes);
-
         setEdges(fetchedEdges);
+
 
       } catch (error) {
         console.error(error);
@@ -84,7 +117,7 @@ const CrawledPages = () => {
     };
 
     fetchData();
-  }, [setNodes]);
+  }, [setNodes, hashMap]);
 
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
