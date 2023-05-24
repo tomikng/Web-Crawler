@@ -36,6 +36,7 @@ const CrawledPages = () => {
            nodes(webPages: "${website}") {
             url
             title
+            crawlTime
             links {
               url
               title
