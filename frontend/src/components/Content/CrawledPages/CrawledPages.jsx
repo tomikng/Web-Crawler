@@ -157,9 +157,9 @@ const CrawledPages = () => {
   const { website } = useParams();
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
-  const [viewMode, setViewMode] = useState("website");
+  const [viewMode, setViewMode] = useState("domain");
   const [hashMap, setHashMap] = useState(new Map());
-  const [mode, setMode] = useState("static");
+  const [mode, setMode] = useState("live");
 
   const handleViewModeChange = useCallback(() => {
     setViewMode(viewMode === "website" ? "domain" : "website");
@@ -170,54 +170,38 @@ const CrawledPages = () => {
   }, [mode]);
 
   useEffect(() => {
-    const loadGraph = async () => {
-      try {
-        const data = await fetchData(website);
-        const filteredNodesData = data.nodes;
+  const loadGraph = async () => {
+    try {
+      const data = await fetchData(website);
+      const filteredNodesData = data.nodes;
 
-        // Rest of the code omitted for brevity
-      } catch (error) {
-        console.error(error);
+      if (viewMode === "website") {
+        const { fetchedNodes, fetchedEdges, newHashMap } = constructWebsiteView(filteredNodesData);
+        setNodes(fetchedNodes);
+        setEdges(fetchedEdges);
+        setHashMap(newHashMap);
+      } else if (viewMode === "domain") {
+        const { fetchedNodes, fetchedEdges } = constructDomainView(filteredNodesData);
+        setNodes(fetchedNodes);
+        setEdges(fetchedEdges);
       }
-    };
-
-    // Update immediately
-    loadGraph();
-
-    let intervalId;
-    if (mode === "live") {
-      // Update periodically if in live mode
-      intervalId = setInterval(loadGraph, 1000); // Adjust this to the desired refresh rate
+    } catch (error) {
+      console.error(error);
     }
+  };
 
-    // Clear interval when mode or website changes
-    return () => clearInterval(intervalId);
-  }, [website, mode, viewMode]); // Added mode to dependencies
+  // Update immediately
+  loadGraph();
 
+  let intervalId;
+  if (mode === "live") {
+    // Update periodically if in live mode
+    intervalId = setInterval(loadGraph, 2000); // Adjust this to the desired refresh rate
+  }
 
-  useEffect(() => {
-    const loadGraph = async () => {
-      try {
-        const data = await fetchData(website);
-        const filteredNodesData = data.nodes;
-
-        if (viewMode === "website") {
-          const { fetchedNodes, fetchedEdges, newHashMap } = constructWebsiteView(filteredNodesData);
-          setNodes(fetchedNodes);
-          setEdges(fetchedEdges);
-          setHashMap(newHashMap);
-        } else if (viewMode === "domain") {
-          const { fetchedNodes, fetchedEdges } = constructDomainView(filteredNodesData);
-          setNodes(fetchedNodes);
-          setEdges(fetchedEdges);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    loadGraph();
-  }, [website, viewMode]);
+  // Clear interval when mode or website changes
+  return () => clearInterval(intervalId);
+  }, [website, mode, viewMode]); // Added viewMode to dependencies
 
   const onConnect = (params) => setEdges((eds) => [...eds, params]);
 
