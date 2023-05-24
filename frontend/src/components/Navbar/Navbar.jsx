@@ -10,7 +10,7 @@ const Navbar = () => {
       <div className="topnav">
         <Link to="/" className={location.pathname === '/' ? 'active' : ''}>Crawling</Link>
         <Link to="/websiteRecords" className={location.pathname === '/websiteRecords' ? 'active' : ''}>Website Records</Link>
-        <Link to="/crawledPages" className={location.pathname === '/crawledPages' ? 'active' : ''}>Crawled Pages</Link>
+        <Link to="/selectWebsite" className={location.pathname === '/selectWebsite' ? 'active' : ''}>Crawled Pages</Link>
         <Link to="/executions" className={location.pathname === '/executions' ? 'active' : ''}>Executions</Link>
       </div>
     </div>
