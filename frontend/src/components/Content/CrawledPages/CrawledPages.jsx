@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import ReactFlow, {
+  useNodesState, 
+  useEdgesState,
+  addEdge,
   MiniMap,
   Controls,
   Background,
@@ -158,9 +161,10 @@ const constructDomainView = (filteredNodesData) => {
 };
 
 const CrawledPages = () => {
+
   const { website } = useParams();
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [viewMode, setViewMode] = useState("domain");
   const [hashMap, setHashMap] = useState(new Map());
   const [mode, setMode] = useState("live");
@@ -207,7 +211,8 @@ const CrawledPages = () => {
   return () => clearInterval(intervalId);
   }, [website, mode, viewMode]); // Added viewMode to dependencies
 
-  const onConnect = (params) => setEdges((eds) => [...eds, params]);
+  // const onConnect = (params) => setEdges((eds) => [...eds, params]);
+  const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   return (
     <div className="graph-container">
@@ -218,6 +223,8 @@ const CrawledPages = () => {
         edges={edges}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
       >
         <Controls />
         <MiniMap />
