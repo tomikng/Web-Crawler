@@ -8,8 +8,8 @@ from .crawler import Crawler
 
 
 @shared_task
-def crawl_website(website_record_label):
-    website_record = WebsiteRecord.objects.get(label=website_record_label)
+def crawl_website(website_id):
+    website_record = WebsiteRecord.objects.get(id=website_id)
     execution = create_new_execution(website_record)
     try:
         crawler_instance = Crawler(website_record)
@@ -18,7 +18,7 @@ def crawl_website(website_record_label):
     except Exception as e:
         handle_crawl_error(execution)
         raise e
-    return website_record_label
+    return website_id
 
 
 def create_new_execution(website_record):

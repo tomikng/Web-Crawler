@@ -19,7 +19,7 @@ def create_periodic_crawl_task(website_record):
         name=task_name,
         defaults={
             'task': 'webcrawler.tasks.crawl_website',
-            'args': f'["{website_record.label}"]',
+            'args': f'["{website_record.id}"]',
             'interval': schedule,
             'enabled': website_record.active,
         }
@@ -35,4 +35,4 @@ def create_periodic_crawl_task(website_record):
         Execution = apps.get_model('api', 'Execution')
         if not Execution.objects.filter(website_record=website_record).exists():
             from .tasks import crawl_website
-            crawl_website.delay(website_record.label)
+            crawl_website.delay(website_record.id)
