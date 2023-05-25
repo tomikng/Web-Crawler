@@ -75,7 +75,9 @@ const constructWebsiteView = (filteredNodesData) => {
         id: `e${sourceId}-${targetId}-${fetchedEdges.length}`,
         source: sourceId,
         target: targetId,
-        arrowHeadType: MarkerType.ArrowClosed,
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+        },
       });
     });
   });
@@ -144,7 +146,9 @@ const constructDomainView = (filteredNodesData) => {
           id: `e${node.id}-${domainNodes[linkDomain].id}-${linkIndex}`,
           source: node.id,
           target: domainNodes[linkDomain].id,
-          arrowHeadType: MarkerType.ArrowClosed,
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+          },
         });
       }
     });
