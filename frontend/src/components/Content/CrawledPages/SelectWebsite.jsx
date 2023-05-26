@@ -25,7 +25,10 @@ const SelectWebsite = () => {
       if (data && data.length > 0) {
         setSelectedWebsite(data[0].id);
       }
-      setWebsiteRecords(data);
+
+      console.log(data);
+
+      setWebsiteRecords(data.results);
     };
 
     fetchData();
