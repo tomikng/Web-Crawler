@@ -18,6 +18,9 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
       },
     });
     const websiteRecords = response.data.results;
+
+    console.log(response);
+
     for (const record of websiteRecords) {
       const executionResponse = await axios.get(`${base_url}/executions/${record.id}`);
       const execution = executionResponse.data;
@@ -26,8 +29,8 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
     }
     return {
       results: websiteRecords,
-      current: response.data.current,
-      total_pages: response.data.total_pages,
+      current: currentPage,
+      total_pages: Math.ceil(response.data.count / pageSize),
     };
   } catch (error) {
     console.error('Error fetching website records:', error);
@@ -129,21 +132,21 @@ const WebsiteRecords = () => {
         </tr>
       </thead>
       <tbody>
-          {websiteRecords.map((websiteRecord) => (
-            <tr key={websiteRecord.identifier}>
-              <td>{websiteRecord.websiteRecord}</td>	
-              <td>	
-                <a href={`/website_records/${websiteRecord.websiteRecord}`}>	
-                  {websiteRecord.label}	
-                </a>	
-              </td>	
-              <td>{websiteRecord.url}</td>	
-              <td>{websiteRecord.periodicity}</td>	
-              <td>{websiteRecord.tags.join(', ')}</td>	
-              <td>{websiteRecord.start_time}</td>	
-              <td>{websiteRecord.status}</td>	
-            </tr>	
-          ))}
+        {websiteRecords.map((websiteRecord) => (
+          <tr key={websiteRecord.id}>
+            <td>{websiteRecord.id}</td>
+            <td>
+              <a href={`/website_records/${websiteRecord.websiteRecord}`}>
+                {websiteRecord.label}
+              </a>
+            </td>
+            <td>{websiteRecord.url}</td>
+            <td>{websiteRecord.periodicity}</td>
+            <td>{websiteRecord.tags.join(', ')}</td>
+            <td>{websiteRecord.start_time}</td>
+            <td>{websiteRecord.status}</td>
+          </tr>
+        ))}
       </tbody>
     </table>
   </div>
