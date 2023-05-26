@@ -23,10 +23,8 @@ const SelectWebsite = () => {
     const fetchData = async () => {
       const data = await fetchWebsiteRecords();
       if (data && data.length > 0) {
-        setSelectedWebsite(data[0].id);
+        setSelectedWebsite(data.results[0].id);
       }
-
-      console.log(data);
 
       setWebsiteRecords(data.results);
     };
