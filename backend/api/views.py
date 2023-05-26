@@ -133,10 +133,10 @@ def get_executions(request):
     label = request.GET.get('label')
     sort = request.GET.get('sort')
 
+    executions = Execution.objects.all()
+
     if label:
-        executions = Execution.objects.filter(website_record__label__icontains=label)
-    else:
-        executions = Execution.objects.all()
+        executions = executions.filter(website_record__label__icontains=label)
 
     if sort in ['start_time', '-start_time']:
         executions = executions.order_by(sort)
@@ -180,7 +180,7 @@ def create_execution(request, website_id):
     # execution = Execution.objects.create(website_record=website)
     # serializer = ExecutionSerializer(execution)
     from webcrawler.tasks import crawl_website
-    crawl_website.delay(website.label)
+    crawl_website.delay(website.id)
     return Response({'success': True})
 
 
