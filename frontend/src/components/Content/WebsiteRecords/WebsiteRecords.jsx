@@ -5,6 +5,46 @@ import axios from 'axios';
 const base_url = 'http://127.0.0.1:8000/api';
 const recordsPerPage = 5;
 
+
+const fetchWebsiteRecord = async (id) => {
+  try {
+    const response = await axios.get(`${base_url}/website_records/${id}/`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching website records:', error);
+    return null;
+  }
+};
+
+const processWebsiteRecords = async (records) => {
+  const processedRecords = [];
+  for (const record of records) {
+    const websiteRecord = await fetchWebsiteRecord(record.website_record);
+    if (websiteRecord) {
+      const { label, id } = websiteRecord;
+      const start_time = record.start_time
+        ? new Date(record.start_time).toLocaleString()
+        : 'None';
+      const end_time = record.end_time
+        ? new Date(record.end_time).toLocaleString()
+        : 'None';
+      processedRecords.push({
+        id: record.id,
+        id_website_record: id,
+        label,
+        status: record.status,
+        start_time,
+        end_time,
+        num_sites_crawled: record.num_sites_crawled,
+        url: websiteRecord.url,
+        tags: websiteRecord.tags,
+        periodicity: websiteRecord.periodicity
+      });
+    }
+  }
+  return processedRecords;
+};
+
 const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, sortBy = 'url', filterLabel = '', filterUrl = '', filterTags = []) => {
   try {
     const response = await axios.get(`${base_url}/website_records/`, {
@@ -17,20 +57,35 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
         tags: filterTags,
       },
     });
-    const websiteRecords = response.data.results;
 
-    console.log(response);
+    const temp = {};
 
-    for (const record of websiteRecords) {
-      const executionResponse = await axios.get(`${base_url}/executions/${record.id}`);
-      const execution = executionResponse.data;
-      record.start_time = execution.start_time;
-      record.status = execution.status;
+    let existNextExecutionPage = true;
+    let i = 1;
+    
+    while (existNextExecutionPage) {
+      const executionResponse = await axios.get(`${base_url}/executions/?page=${i}`);
+      if (executionResponse.data.next === null) {
+        existNextExecutionPage = false;
+      }
+      i++;
+      const processedData = await processWebsiteRecords(executionResponse.data.results);
+    
+      for (const data of processedData) {
+        const { id_website_record, start_time } = data;
+        if (!(id_website_record in temp) || start_time > temp[id_website_record].start_time) {
+          temp[id_website_record] = data;
+        }
+      }
+    
     }
+    
+    const uniqueElements = Object.values(temp);
+
     return {
-      results: websiteRecords,
+      results: uniqueElements,
       current: currentPage,
-      total_pages: Math.ceil(response.data.count / pageSize),
+      total_pages: Math.ceil(response.data.count / pageSize)
     };
   } catch (error) {
     console.error('Error fetching website records:', error);
@@ -47,18 +102,18 @@ const WebsiteRecords = () => {
   const [filterUrl, setFilterUrl] = useState('');
   const [filterTags, setFilterTags] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const websiteRecordsData = await fetchWebsiteRecords(
-        currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
-      );
-      if (websiteRecordsData) {
-        setWebsiteRecords(websiteRecordsData.results);
-        setCurrentPage(websiteRecordsData.current);
-        setTotalPages(websiteRecordsData.total_pages);
-      }
-    };
+  const fetchData = async () => {
+    const websiteRecordsData = await fetchWebsiteRecords(
+      currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
+    );
+    if (websiteRecordsData) {
+      setWebsiteRecords(websiteRecordsData.results);
+      setCurrentPage(websiteRecordsData.current);
+      setTotalPages(websiteRecordsData.total_pages);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [sortedBy, currentPage, filterLabel, filterUrl, filterTags]);
 
@@ -66,14 +121,14 @@ const WebsiteRecords = () => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
   };
 
-  const handlePageChange = async (page) => {
+  const handleFilterChange = (event, setFilterState, filterName) => {
+    setFilterState(event.target.value);
+    fetchData();
+  };
+
+  const handlePageChange = (page) => {
     setCurrentPage(page);
-    const websiteRecordsData = await fetchWebsiteRecords(
-      page, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
-    );
-    if (websiteRecordsData) {
-      setWebsiteRecords(websiteRecordsData.results);
-    }
+    fetchData();
   };
 
   const handleFilterLabelChange = async (event) => {
