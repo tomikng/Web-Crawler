@@ -13,6 +13,7 @@ import './CrawledPages.css';
 import CustomNodeComponent from './CustomNodeComponent';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import dagre from 'dagre';
 
 const BASE_URL = "http://127.0.0.1:8000/api/graphql/";
 
@@ -63,11 +64,11 @@ const constructWebsiteView = (filteredNodesData) => {
     maxDepth = Math.max(maxDepth, nodeTree[nodeId].length);
   });
 
-  Object.entries(nodeTree).forEach(([nodeId, children], index) => {
+  Object.entries(nodeTree).forEach(([nodeId], index) => {
     fetchedNodes.push({
       id: nodeId,
       type: 'customNode',
-      position: { x: children.length * (1000 / (maxDepth + 1)), y: index * 100 },
+      position: { x: 0, y: 0},
       data: filteredNodesData[index],
     });
   });
@@ -139,7 +140,7 @@ const constructDomainView = (filteredNodesData) => {
     fetchedNodes.push({
       id: node.id,
       type: 'customNode',
-      position: { x: 100 + index * 150, y: 100 + node.links.length * 50 }, // adjust x and y positions for better layout
+      position: { x: 0, y: 0}, // adjust x and y positions for better layout
       data: { label: node.title, url: node.url, owner: node.owner }
     });
 
@@ -160,6 +161,10 @@ const constructDomainView = (filteredNodesData) => {
   return { fetchedNodes, fetchedEdges };
 };
 
+const defaultNodeWidth = 150;
+const defaultNodeHeight = 50;
+
+
 const CrawledPages = () => {
 
   const { website } = useParams();
@@ -176,6 +181,41 @@ const CrawledPages = () => {
   const handleModeChange = useCallback(() => {
     setMode(mode === "static" ? "live" : "static");
   }, [mode]);
+
+
+  useEffect(() => {
+    const g = new dagre.graphlib.Graph();
+    g.setDefaultEdgeLabel(() => ({}));
+    g.setGraph({
+      rankdir: 'LR'  // set graph direction to top-bottom
+    });
+
+    const scaleFactor = 2;
+
+    nodes.forEach((node) => {
+      g.setNode(node.id, { 
+        width: (node.__rf?.width || defaultNodeWidth) * scaleFactor,
+        height:(node.__rf?.height || defaultNodeHeight) * scaleFactor
+      });
+    });
+
+    edges.forEach((edge) => {
+      g.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(g);
+
+    g.nodes().forEach((nodeId) => {
+      const nodeInfo = g.node(nodeId);
+      const node = nodes.find((el) => el.id === nodeId);
+      node.position = {
+        x: nodeInfo.x - (node.__rf?.width || defaultNodeWidth) / 2,
+        y: nodeInfo.y - (node.__rf?.height || defaultNodeHeight) / 2,
+      };
+    });
+
+    setNodes([...nodes]);
+  }, [nodes, edges, setNodes]);
 
   useEffect(() => {
   const loadGraph = async () => {

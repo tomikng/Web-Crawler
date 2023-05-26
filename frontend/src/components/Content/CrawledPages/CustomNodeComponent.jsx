@@ -18,10 +18,10 @@ const CustomNodeComponent = ({ data }) => {
 
   return (
     <div className={nodeStyle} onDoubleClick={() => handleClick(nodeStyle)}>
-      <div className='labelName'>{data.label}</div>
+      <div className='labelName'>{data.title}</div>
       <div className='url'>{data.url}</div>
-      <Handle type="target" position="right" style={{ background: '#555' }}/>
-      <Handle type="source" position="left" style={{ background: '#555' }}/>
+      <Handle type="target" position="left" style={{ background: '#555' }}/>
+      <Handle type="source" position="right" style={{ background: '#555' }}/>
     </div>
   );
 };
