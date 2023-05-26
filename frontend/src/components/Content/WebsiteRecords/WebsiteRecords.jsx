@@ -3,154 +3,113 @@ import './WebsiteRecords.css';
 import axios from 'axios';
 
 const base_url = 'http://127.0.0.1:8000/api';
+const recordsPerPage = 5;
 
-const fetchExecutions = async () => {
+const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, sortBy = 'url', filterLabel = '', filterUrl = '', filterTags = []) => {
   try {
-    const response = await axios.get(`${base_url}/executions/`);
-    const data = response.data;
-    return data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return null;
-  }
-};
-
-const fetchWebsiteRecords = async (id) => {
-  try {
-    const response = await axios.get(`${base_url}/website_records/${id}/`);
-    return response.data;
+    const response = await axios.get(`${base_url}/website_records/`, {
+      params: {
+        page: currentPage,
+        page_size: pageSize,
+        sort: sortBy,
+        label: filterLabel,
+        url: filterUrl,
+        tags: filterTags,
+      },
+    });
+    const websiteRecords = response.data.results;
+    for (const record of websiteRecords) {
+      const executionResponse = await axios.get(`${base_url}/executions/${record.id}`);
+      const execution = executionResponse.data;
+      record.start_time = execution.start_time;
+      record.status = execution.status;
+    }
+    return {
+      results: websiteRecords,
+      current: response.data.current,
+      total_pages: response.data.total_pages,
+    };
   } catch (error) {
     console.error('Error fetching website records:', error);
     return null;
   }
 };
 
-const processWebsiteRecords = async (records, sortBy) => {
-  const groupedRecords = {};
-
-  for (const record of records) {
-    const websiteRecord = await fetchWebsiteRecords(record.website_record);
-    if (websiteRecord) {
-      const { id, label, url, periodicity, tags } = websiteRecord;
-      const startTime = new Date(record.start_time).toLocaleString();
-
-      if (!groupedRecords[id] || new Date(groupedRecords[id].start_time) < new Date(startTime)) {
-        groupedRecords[id] = {
-          id: record.id,
-          websiteRecord: id,
-          label: label,
-          url: url,
-          periodicity: periodicity,
-          status: record.status,
-          tags: tags,
-          start_time: startTime,
-        };
-      }
-    }
-  }
-
-  const processedRecords = Object.values(groupedRecords);
-
-  processedRecords.sort((a, b) => {
-    if (sortBy === 'url') {
-      return a.url.localeCompare(b.url);
-    } else if (sortBy === '-url') {
-      return b.url.localeCompare(a.url);
-    } else if (sortBy === 'start_time') {
-      return new Date(a.start_time) - new Date(b.start_time);
-    } else if (sortBy === '-start_time') {
-      return new Date(b.start_time) - new Date(a.start_time);
-    }
-    return 0;
-  });
-
-  return processedRecords;
-};
-
-
 const WebsiteRecords = () => {
   const [websiteRecords, setWebsiteRecords] = useState([]);
-  const [sortedBy, setSortedBy] = useState('url');  
-  const [currentPage, setCurrentPage] = useState(1);  
-  const recordsPerPage = 5;
-
+  const [sortedBy, setSortedBy] = useState('url');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [filterLabel, setFilterLabel] = useState('');
   const [filterUrl, setFilterUrl] = useState('');
   const [filterTags, setFilterTags] = useState([]);
 
-  const [displayedRecords, setDisplayedRecords] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
-      const executionData = await fetchExecutions();
-      if (executionData) {
-        const processedData = await processWebsiteRecords(executionData, sortedBy);
-        setWebsiteRecords(processedData);
+      const websiteRecordsData = await fetchWebsiteRecords(
+        currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
+      );
+      if (websiteRecordsData) {
+        setWebsiteRecords(websiteRecordsData.results);
+        setCurrentPage(websiteRecordsData.current);
+        setTotalPages(websiteRecordsData.total_pages);
       }
     };
 
     fetchData();
-  }, [sortedBy]); 
+  }, [sortedBy, currentPage, filterLabel, filterUrl, filterTags]);
 
-
-  useEffect(() => {
-    // Apply filters and pagination when websiteRecords or filters change
-    const filteredRecords = applyFilters(websiteRecords);
-    const totalRecords = filteredRecords.length;
-    const totalPages = Math.ceil(totalRecords / recordsPerPage);
-    if (totalPages > 0 && currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-    const startIndex = (currentPage - 1) * recordsPerPage;
-    const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);
-    setDisplayedRecords(filteredRecords.slice(startIndex, endIndex + 1));
-  }, [websiteRecords, filterLabel, filterUrl, filterTags, currentPage]);
-
-  const sortIcon = (field) => {	
+  const sortIcon = (field) => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
   };
 
-  const applyFilters = (records) => {
-    return records.filter((record) => {
-      const labelMatch = record.label.toLowerCase().includes(filterLabel.toLowerCase());
-      const urlMatch = record.url.toLowerCase().includes(filterUrl.toLowerCase());
-      const tagsMatch = filterTags.every((tag) => record.tags.includes(tag.toLowerCase()));
-      return labelMatch && urlMatch && tagsMatch;
-    });
+  const handlePageChange = async (page) => {
+    setCurrentPage(page);
+    const websiteRecordsData = await fetchWebsiteRecords(
+      page, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
+    );
+    if (websiteRecordsData) {
+      setWebsiteRecords(websiteRecordsData.results);
+    }
   };
 
-   const filteredRecords = applyFilters(websiteRecords);
-   // Calculate pagination values  
-   const totalRecords = filteredRecords.length;  
-   const totalPages = Math.ceil(totalRecords / recordsPerPage);  
-   const startIndex = (currentPage - 1) * recordsPerPage;  
-   const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);  
-   const currentRecords = filteredRecords.slice(startIndex, endIndex + 1);  
-   const handlePageChange = (page) => {  
-     setCurrentPage(page);  
-   };
-
-  const handleFilterLabelChange = (event) => {
+  const handleFilterLabelChange = async (event) => {
     setFilterLabel(event.target.value);
+    const websiteRecordsData = await fetchWebsiteRecords(
+      currentPage, recordsPerPage, sortedBy, event.target.value, filterUrl, filterTags
+    );
+    if (websiteRecordsData) {
+      setWebsiteRecords(websiteRecordsData.results);
+    }
   };
 
-  const handleFilterUrlChange = (event) => {
+  const handleFilterUrlChange = async (event) => {
     setFilterUrl(event.target.value);
+    const websiteRecordsData = await fetchWebsiteRecords(
+      currentPage, recordsPerPage, sortedBy, filterLabel, event.target.value, filterTags
+    );
+    if (websiteRecordsData) {
+      setWebsiteRecords(websiteRecordsData.results);
+    }
   };
 
-  const handleFilterTagsChange = (event) => {
+  const handleFilterTagsChange = async (event) => {
     const tags = event.target.value.split(",").map((tag) => tag.trim());
     setFilterTags(tags);
+    const websiteRecordsData = await fetchWebsiteRecords(
+      currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, tags
+    );
+    if (websiteRecordsData) {
+      setWebsiteRecords(websiteRecordsData.results);
+    }
   };
-
-  // currentRecords = applyFilters(websiteRecords);
 
   return (
     <div>
       <div className="filter-container">
         <input type="text" placeholder="Filter by Label" value={filterLabel} onChange={handleFilterLabelChange} />
         <input type="text" placeholder="Filter by URL" value={filterUrl} onChange={handleFilterUrlChange} />
-        <input type="text" placeholder="Filter by Tags" value={filterTags} onChange={handleFilterTagsChange} />
+        <input type="text" placeholder="Filter by Tags" value={filterTags.join(',')} onChange={handleFilterTagsChange} />
       </div>
       <div className="websites-records-container">
         <table>
@@ -158,20 +117,20 @@ const WebsiteRecords = () => {
             <tr>
               <th>ID</th>
               <th>Label</th>
-              <th onClick={() => setSortedBy(sortedBy === 'url' ? '-url' : 'url')}>	
-                  Url {sortIcon('url')}	
+              <th onClick={() => setSortedBy(sortedBy === 'url' ? '-url' : 'url')}>
+                  Url {sortIcon('url')}
               </th>
               <th>Periodicity</th>
               <th>Tags</th>
-              <th onClick={() => setSortedBy(sortedBy === 'start_time' ? '-start_time' : 'start_time')}>	
-                Last time execution {sortIcon('start_time')}	
+              <th onClick={() => setSortedBy(sortedBy === 'start_time' ? '-start_time' : 'start_time')}>
+                Last time execution {sortIcon('start_time')}
               </th>
               <th>Status last execution</th>
         </tr>
       </thead>
       <tbody>
-          {displayedRecords.map((websiteRecord) => (	
-            <tr key={websiteRecord.id}>	
+          {websiteRecords.map((websiteRecord) => (
+            <tr key={websiteRecord.identifier}>
               <td>{websiteRecord.websiteRecord}</td>	
               <td>	
                 <a href={`/website_records/${websiteRecord.websiteRecord}`}>	
