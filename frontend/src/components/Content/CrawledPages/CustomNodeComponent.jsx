@@ -16,7 +16,7 @@ const CustomNodeComponent = ({ data }) => {
   const nodeStyle = (matchesWebsiteRegex || domainHasRestriction) ? 'customNode matches' : 'customNode';
 
 
-  console.log(nodeStyle, data.url, data.regexpRestricted)
+  // console.log(nodeStyle, data.url, data.regexpRestricted)
 
   const handleClick = () => {
     console.log(data.id);
