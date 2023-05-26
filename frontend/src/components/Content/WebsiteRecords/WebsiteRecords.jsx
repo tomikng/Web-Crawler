@@ -97,15 +97,29 @@ const WebsiteRecords = () => {
   };
 
   const handleFilterTagsChange = async (event) => {
-    const tags = event.target.value.split(",").map((tag) => tag.trim());
-    setFilterTags(tags);
-    const websiteRecordsData = await fetchWebsiteRecords(
-      currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, tags
-    );
-    if (websiteRecordsData) {
-      setWebsiteRecords(websiteRecordsData.results);
+    const inputValue = event.target.value.trim();
+    
+    // Check if the input is empty
+    if (inputValue === '') {
+      setFilterTags([]);
+      const websiteRecordsData = await fetchWebsiteRecords(
+        currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl
+      );
+      if (websiteRecordsData) {
+        setWebsiteRecords(websiteRecordsData.results);
+      }
+    } else {
+      // Split the input value into tags and trim each tag
+      const tags = inputValue.split(",").map((tag) => tag.trim());
+      setFilterTags(tags);
+      const websiteRecordsData = await fetchWebsiteRecords(
+        currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, tags
+      );
+      if (websiteRecordsData) {
+        setWebsiteRecords(websiteRecordsData.results);
+      }
     }
-  };
+};
 
   return (
     <div>
@@ -136,7 +150,7 @@ const WebsiteRecords = () => {
           <tr key={websiteRecord.id}>
             <td>{websiteRecord.id}</td>
             <td>
-              <a href={`/website_records/${websiteRecord.websiteRecord}`}>
+              <a href={`/website_records/${websiteRecord.id}`}>
                 {websiteRecord.label}
               </a>
             </td>
