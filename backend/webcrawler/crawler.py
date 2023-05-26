@@ -46,7 +46,7 @@ class Crawler:
         execution.status = 'running'
         execution.start_time = make_aware(datetime.now())
         execution.end_time = None
-        execution.num_sites_crawled = 0
+        execution.num_sites_crawled = self.num_crawled
 
         return execution
 

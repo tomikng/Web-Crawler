@@ -2,9 +2,24 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
+from drf_yasg import openapi
 
+
+from .filters import ExecutionFilter, WebsiteRecordFilter
 from .serializers import WebsiteRecordSerializer, ExecutionSerializer
 from .models import WebsiteRecord, Execution
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 2
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = ExecutionFilter
+    ordering_fields = ['start_time']
 
 
 @swagger_auto_schema(method='POST', request_body=WebsiteRecordSerializer)
@@ -45,18 +60,20 @@ def delete_website_record(request, identifier):
     return Response({'success': True})
 
 
-@swagger_auto_schema(method='GET', responses={200: WebsiteRecordSerializer(many=True)})
-@api_view(['GET'])
-def get_website_records(request):
-    """
-    Get all website records.
-    """
-    website_records = WebsiteRecord.objects.all()
-    serializer = WebsiteRecordSerializer(website_records, many=True)
-    return Response(serializer.data)
-
-
-@swagger_auto_schema(method='GET', responses={200: ExecutionSerializer(many=True)})
+@swagger_auto_schema(
+    method='GET',
+    responses={200: ExecutionSerializer(many=True)},
+    manual_parameters=[
+        openapi.Parameter(
+            name='ordering',
+            in_=openapi.IN_QUERY,
+            required=False,
+            type=openapi.TYPE_STRING,
+            enum=['start_time', '-start_time'],
+            description='Order executions by start time (ascending or descending)',
+        ),
+    ]
+)
 @api_view(['GET'])
 def get_executions(request):
     """
@@ -67,8 +84,42 @@ def get_executions(request):
         executions = Execution.objects.filter(website_record__in=website_records)
     else:
         executions = Execution.objects.all()
-    serializer = ExecutionSerializer(executions, many=True)
-    return Response(serializer.data)
+
+    execution_filter = ExecutionFilter(request.GET, queryset=executions)
+    paginator = StandardResultsSetPagination()
+    paginated_executions = paginator.paginate_queryset(execution_filter.qs, request)
+
+    serializer = ExecutionSerializer(paginated_executions, many=True)
+    return paginator.get_paginated_response(serializer.data)
+
+
+@swagger_auto_schema(
+    method='GET',
+    responses={200: WebsiteRecordSerializer(many=True)},
+    manual_parameters = [
+        openapi.Parameter(
+            name='ordering',
+            in_=openapi.IN_QUERY,
+            required=False,
+            type=openapi.TYPE_STRING,
+            enum=['url', '-url'],
+            description='Order executions by start time (ascending or descending)',
+        ),
+    ]
+)
+@api_view(['GET'])
+def get_website_records(request):
+    """
+    Get all website records.
+    Filter by url, label, and tags with /api/website_records?url=<url>&label=<label>&tags=<tags>
+    """
+    website_records = WebsiteRecord.objects.all()
+    website_records_filter = WebsiteRecordFilter(request.GET, queryset=website_records)
+    paginator = StandardResultsSetPagination()
+    paginated_website_records = paginator.paginate_queryset(website_records_filter.qs, request)
+
+    serializer = WebsiteRecordSerializer(paginated_website_records, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 @swagger_auto_schema(method='GET', responses={200: WebsiteRecordSerializer()})
