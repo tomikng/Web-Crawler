@@ -190,10 +190,12 @@ const CrawledPages = () => {
       rankdir: 'LR'  // set graph direction to top-bottom
     });
 
+    const scaleFactor = 2;
+
     nodes.forEach((node) => {
       g.setNode(node.id, { 
-        width: node.__rf?.width || defaultNodeWidth, 
-        height: node.__rf?.height || defaultNodeHeight 
+        width: (node.__rf?.width || defaultNodeWidth) * scaleFactor,
+        height:(node.__rf?.height || defaultNodeHeight) * scaleFactor
       });
     });
 
