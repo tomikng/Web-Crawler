@@ -16,7 +16,7 @@ def crawl_website(website_id):
         execute_crawl(crawler_instance, website_record.url, execution.id)
         update_execution(execution, crawler_instance)
     except Exception as e:
-        handle_crawl_error(execution)
+        handle_crawl_error(execution, crawler_instance)
         raise e
     return website_id
 
@@ -44,9 +44,9 @@ def update_execution(execution, crawler_instance):
     execution.save()
 
 
-def handle_crawl_error(execution):
+def handle_crawl_error(execution, crawler_instance):
     execution.status = 'failed'
     execution.start_time = make_aware(datetime.now())
     execution.end_time = None
-    execution.num_sites_crawled = 0
+    execution.num_sites_crawled = crawler_instance.num_crawled
     execution.save()
