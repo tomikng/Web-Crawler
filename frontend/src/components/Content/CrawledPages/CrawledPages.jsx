@@ -69,7 +69,10 @@ const constructWebsiteView = (filteredNodesData) => {
       id: nodeId,
       type: 'customNode',
       position: { x: 0, y: 0},
-      data: filteredNodesData[index],
+      data: {
+        ...filteredNodesData[index],
+        viewMode: "website"
+      },
     });
   });
 
@@ -93,41 +96,53 @@ const constructDomainView = (filteredNodesData) => {
   let fetchedEdges = [];
   let fetchedNodes = [];
   let domainNodes = {};
+  let domainWithRegexpRestrictedPage = new Set();
+
 
   filteredNodesData.forEach((node) => {
     if(node.url){
+      let urlObj;
       try {
-        const urlObj = new URL(node.url);
-        const domain = urlObj.hostname;
-        if (!domainNodes[domain]) {
-          domainNodes[domain] = {
-            id: domain, // use the domain as id to ensure uniqueness
-            url: domain,
-            links: [],
-            title: domain,
-            owner: node.owner
-          }
-        }
-        domainNodes[domain].links = [
-          ...new Set([...domainNodes[domain].links, // use Set to remove duplicates
-            ...node.links.map(link => {
-              const linkDomain = new URL(link.url).hostname;
-              if (!domainNodes[linkDomain]) {
-                // add new domain node if not exists
-                domainNodes[linkDomain] = {
-                  id: linkDomain,
-                  url: linkDomain,
-                  links: [],
-                  title: linkDomain,
-                  owner: node.owner
-                }
-              }
-              return linkDomain;
-            })])
-        ];
+        urlObj = new URL(node.url);
       } catch (error) {
         console.error(`Invalid URL: ${node.url}`);
+        return; // Skip to the next iteration if the URL is not valid
       }
+      const domain = urlObj.hostname;
+      // Check if the node URL matches the regexp
+      const matchesRegexp = new RegExp(node.owner.regexp).test(node.url);
+      if (matchesRegexp) {
+        domainWithRegexpRestrictedPage.add(domain);
+      }
+
+      if (!domainNodes[domain]) {
+        domainNodes[domain] = {
+          id: domain, // use the domain as id to ensure uniqueness
+          url: domain,
+          links: [],
+          title: domain,
+          owner: node.owner,
+        };
+      }
+
+      domainNodes[domain].links = [
+        ...new Set([...domainNodes[domain].links, // use Set to remove duplicates
+          ...node.links.map(link => {
+            const linkDomain = new URL(link.url).hostname;
+            if (!domainNodes[linkDomain]) {
+              // add new domain node if not exists
+              domainNodes[linkDomain] = {
+                id: linkDomain,
+                url: linkDomain,
+                links: [],
+                title: linkDomain,
+                owner: node.owner
+              }
+            }
+            return linkDomain;
+          })])
+      ];
+
     }
   });
 
@@ -137,12 +152,19 @@ const constructDomainView = (filteredNodesData) => {
   // Build nodes and edges
   sortedDomains.forEach((domain, index) => {
     const node = domainNodes[domain];
-    fetchedNodes.push({
-      id: node.id,
-      type: 'customNode',
-      position: { x: 0, y: 0}, // adjust x and y positions for better layout
-      data: { label: node.title, url: node.url, owner: node.owner }
-    });
+    const regexpRestricted = domainWithRegexpRestrictedPage.has(domain);
+      fetchedNodes.push({
+        id: node.id,
+        type: 'customNode',
+        position: { x: 0, y: 0},
+        data: {
+          label: node.title,
+          url: node.url,
+          owner: node.owner,
+          regexpRestricted,
+          viewMode: "domain"
+        }
+      });
 
     node.links.forEach((linkDomain, linkIndex) => {
       if (domainNodes[linkDomain]) {
@@ -208,16 +230,21 @@ const CrawledPages = () => {
     g.nodes().forEach((nodeId) => {
       const nodeInfo = g.node(nodeId);
       const node = nodes.find((el) => el.id === nodeId);
-      node.position = {
-        x: nodeInfo.x - (node.__rf?.width || defaultNodeWidth) / 2,
-        y: nodeInfo.y - (node.__rf?.height || defaultNodeHeight) / 2,
-      };
+      if (node) { // Ensure node is not undefined
+        node.position = {
+          x: nodeInfo?.x - (node?.__rf?.width || defaultNodeWidth) / 2,
+          y: nodeInfo?.y - (node?.__rf?.height || defaultNodeHeight) / 2,
+        };
+      } else {
+        console.warn(`Node with id ${nodeId} not found in nodes array`);
+      }
     });
 
     setNodes([...nodes]);
   }, [nodes, edges, setNodes]);
 
-  useEffect(() => {
+useEffect(() => {
+  // Fetch the data first, and then set state
   const loadGraph = async () => {
     try {
       const data = await fetchData(website);

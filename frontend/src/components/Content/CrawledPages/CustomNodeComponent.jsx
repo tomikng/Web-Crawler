@@ -5,16 +5,24 @@ import { useNavigate } from 'react-router-dom';
 
 const CustomNodeComponent = ({ data }) => {
   const navigate = useNavigate();
-  // Check if the URL matches the regex
-  const matchesRegex = new RegExp(data.owner.regexp).test(data.url);
-  const nodeStyle = matchesRegex ? 'customNode matches' : 'customNode';
+
+  // Check if the URL matches the regex for the website view
+  const matchesWebsiteRegex = data.viewMode === "website" && new RegExp(data.owner.regexp).test(data.url);
+
+  // Check if there is a regex restriction for the domain view
+  const domainHasRestriction = data.viewMode === "domain" && data.regexpRestricted;
+
+  // Determine the nodeStyle based on both conditions
+  const nodeStyle = (matchesWebsiteRegex || domainHasRestriction) ? 'customNode matches' : 'customNode';
+
+
+  console.log(nodeStyle, data.url, data.regexpRestricted)
 
   const handleClick = () => {
     console.log(data.id);
     // Perform any desired operations with the node information
     navigate('/nodeDetail/' + data.id, { state: { data, nodeStyle } });
   };
-
 
   return (
     <div className={nodeStyle} onDoubleClick={() => handleClick(nodeStyle)}>
