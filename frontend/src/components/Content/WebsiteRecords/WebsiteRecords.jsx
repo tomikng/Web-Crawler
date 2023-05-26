@@ -125,8 +125,8 @@ const WebsiteRecords = () => {
               </th>
               <th>Periodicity</th>
               <th>Tags</th>
-              <th onClick={() => setSortedBy(sortedBy === 'start_time' ? '-start_time' : 'start_time')}>
-                Last time execution {sortIcon('start_time')}
+              <th onClick={() => setSortedBy(sortedBy === 'last_crawled' ? '-last_crawled' : 'last_crawled')}>
+                Last time execution {sortIcon('last_crawled')}
               </th>
               <th>Status last execution</th>
         </tr>
