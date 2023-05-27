@@ -21,7 +21,9 @@ const CustomNodeComponent = ({ data }) => {
   const handleClick = () => {
     console.log(data.id);
     // Perform any desired operations with the node information
-    navigate('/nodeDetail/' + data.id, { state: { data, nodeStyle } });
+    if(data.viewMode === "website") {
+      navigate('/nodeDetail/' + data.id, { state: { data, nodeStyle } });
+    }
   };
 
   return (

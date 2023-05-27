@@ -236,7 +236,7 @@ const CrawledPages = () => {
           y: nodeInfo?.y - (node?.__rf?.height || defaultNodeHeight) / 2,
         };
       } else {
-        console.warn(`Node with id ${nodeId} not found in nodes array`);
+        // console.warn(`Node with id ${nodeId} not found in nodes array`);
       }
     });
 

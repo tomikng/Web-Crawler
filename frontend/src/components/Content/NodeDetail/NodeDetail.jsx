@@ -28,23 +28,33 @@ const NodeDetail = () => {
 
 
     const fetchWebsiteRecords = async () => {
-        try {
-          const response = await axios.get(`${base_url}/website_records/`);
-          return response.data;
-        } catch (error) {
-          console.error('Error fetching website records:', error);
-          return null;
+      try {
+        let allWebsiteRecords = [];
+        let hasMore = true;
+        let page = 1;
+
+        while (hasMore) {
+          const response = await axios.get(`${base_url}/website_records/?page=${page}`);
+          allWebsiteRecords = [...allWebsiteRecords, ...response.data.results];
+          hasMore = response.data.next !== null;
+          page += 1;
         }
-      };
+
+        return allWebsiteRecords;
+      } catch (error) {
+        console.error('Error fetching all website records:', error);
+        return [];
+      }
+    };
 
     const executeHandle = async (url) => {
-        const websiteRecords = await fetchWebsiteRecords();
+      const websiteRecords = await fetchWebsiteRecords();
 
-        var existsInArray = websiteRecords.some(function(item) {
-            return item.url === url;
-        });
+      const existsInArray = websiteRecords.some(function (item) {
+        return item.url === url;
+      });
 
-        if(existsInArray){
+      if(existsInArray){
             createExecution(data.owner.identifier);
         }else{
             setSelectedUrl(url);
