@@ -5,48 +5,36 @@ import axios from 'axios';
 const base_url = 'http://127.0.0.1:8000/api';
 const recordsPerPage = 5;
 
-
-const fetchWebsiteRecord = async (id) => {
-  try {
-    const response = await axios.get(`${base_url}/website_records/${id}/`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching website records:', error);
-    return null;
-  }
-};
-
-const processWebsiteRecords = async (records) => {
-  const processedRecords = [];
-  for (const record of records) {
-    const websiteRecord = await fetchWebsiteRecord(record.website_record);
-    if (websiteRecord) {
-      const { label, id } = websiteRecord;
-      const start_time = record.start_time
-        ? new Date(record.start_time).toLocaleString()
-        : 'None';
-      const end_time = record.end_time
-        ? new Date(record.end_time).toLocaleString()
-        : 'None';
-      processedRecords.push({
-        id: record.id,
-        id_website_record: id,
-        label,
-        status: record.status,
-        start_time,
-        end_time,
-        num_sites_crawled: record.num_sites_crawled,
-        url: websiteRecord.url,
-        tags: websiteRecord.tags,
-        periodicity: websiteRecord.periodicity
-      });
-    }
-  }
-  return processedRecords;
-};
-
 const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, sortBy = 'url', filterLabel = '', filterUrl = '', filterTags = []) => {
   try {
+
+    const allExecutions = [];
+    let numberOfPage = 1;
+
+    while (true) {
+      const executions = await axios.get(`${base_url}/executions/?page=${numberOfPage}`);
+
+      allExecutions.push(...executions.data.results);
+
+      if (executions.data.next !== null) {
+        numberOfPage++;
+      } else {
+        break;
+      }
+    }
+
+    const uniqueExecutions = {};
+
+    allExecutions.forEach(execution => {
+      if (!uniqueExecutions[execution.website_record] || new Date(execution.start_time) > new Date(uniqueExecutions[execution.website_record].start_time)) {
+        uniqueExecutions[execution.website_record] = { ...execution };
+      }
+    });
+
+    const uniqueExecutionsArray = Object.values(uniqueExecutions);
+
+    console.log(uniqueExecutionsArray);
+
     const response = await axios.get(`${base_url}/website_records/`, {
       params: {
         page: currentPage,
@@ -58,34 +46,21 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
       },
     });
 
-    const temp = {};
+    const websiteRecords = response.data.results;
 
-    let existNextExecutionPage = true;
-    let i = 1;
-    
-    while (existNextExecutionPage) {
-      const executionResponse = await axios.get(`${base_url}/executions/?page=${i}`);
-      if (executionResponse.data.next === null) {
-        existNextExecutionPage = false;
+    const combinedArray = websiteRecords.reduce((result, execution) => {
+      const matchingElement = uniqueExecutionsArray.find(element => element.website_record === execution.id);
+      if (matchingElement) {
+        result.push({ ...execution, ...matchingElement });
       }
-      i++;
-      const processedData = await processWebsiteRecords(executionResponse.data.results);
+      return result;
+    }, []);
     
-      for (const data of processedData) {
-        const { id_website_record, start_time } = data;
-        if (!(id_website_record in temp) || start_time > temp[id_website_record].start_time) {
-          temp[id_website_record] = data;
-        }
-      }
     
-    }
-    
-    const uniqueElements = Object.values(temp);
-
     return {
-      results: uniqueElements,
+      results: combinedArray,
       current: currentPage,
-      total_pages: Math.ceil(response.data.count / pageSize)
+      total_pages: Math.ceil(response.data.count / pageSize),
     };
   } catch (error) {
     console.error('Error fetching website records:', error);
@@ -102,18 +77,18 @@ const WebsiteRecords = () => {
   const [filterUrl, setFilterUrl] = useState('');
   const [filterTags, setFilterTags] = useState([]);
 
-  const fetchData = async () => {
-    const websiteRecordsData = await fetchWebsiteRecords(
-      currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
-    );
-    if (websiteRecordsData) {
-      setWebsiteRecords(websiteRecordsData.results);
-      setCurrentPage(websiteRecordsData.current);
-      setTotalPages(websiteRecordsData.total_pages);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      const websiteRecordsData = await fetchWebsiteRecords(
+        currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
+      );
+      if (websiteRecordsData) {
+        setWebsiteRecords(websiteRecordsData.results);
+        setCurrentPage(websiteRecordsData.current);
+        setTotalPages(websiteRecordsData.total_pages);
+      }
+    };
+
     fetchData();
   }, [sortedBy, currentPage, filterLabel, filterUrl, filterTags]);
 
@@ -121,14 +96,14 @@ const WebsiteRecords = () => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
   };
 
-  const handleFilterChange = (event, setFilterState, filterName) => {
-    setFilterState(event.target.value);
-    fetchData();
-  };
-
-  const handlePageChange = (page) => {
+  const handlePageChange = async (page) => {
     setCurrentPage(page);
-    fetchData();
+    const websiteRecordsData = await fetchWebsiteRecords(
+      page, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
+    );
+    if (websiteRecordsData) {
+      setWebsiteRecords(websiteRecordsData.results);
+    }
   };
 
   const handleFilterLabelChange = async (event) => {
@@ -212,7 +187,9 @@ const WebsiteRecords = () => {
             <td>{websiteRecord.url}</td>
             <td>{websiteRecord.periodicity}</td>
             <td>{websiteRecord.tags.join(', ')}</td>
-            <td>{websiteRecord.start_time}</td>
+            <td>{
+                new Date(websiteRecord.start_time).toLocaleString()
+            }</td>
             <td>{websiteRecord.status}</td>
           </tr>
         ))}
