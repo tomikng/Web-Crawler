@@ -10,7 +10,7 @@ const recordsPerPage = 2;
 
 const fetchExecutions = async (label='', sort='start_time', page=1, page_size=recordsPerPage) => {
   try {
-    const response = await axios.get(`${base_url}/executions/?website_record_label=${label}&sort=${sort}&page=${page}&page_size=${page_size}`);
+    const response = await axios.get(`${base_url}/executions/?label=${label}&sort=${sort}&page=${page}&page_size=${page_size}`);
     const data = response.data;
     return {
       count: data.count,
@@ -132,7 +132,7 @@ const Executions = () => {
 
   useEffect(() => {
     fetchAndProcessData();
-  }, [fetchAndProcessData]);
+  }, [fetchAndProcessData, filterLabel]);
 
   useEffect(() => {
     if (filterLabel) {
@@ -154,9 +154,7 @@ const Executions = () => {
 
   // Calculate pagination values
   const totalPages = Math.ceil(totalRecords / recordsPerPage);
-  const startIndex = (currentPage - 1) * recordsPerPage;
-  const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);
-  const currentRecords = filteredRecords.slice(startIndex, endIndex + 1);
+
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
