@@ -4,16 +4,37 @@ import axios from 'axios';
 
 const base_url = 'http://127.0.0.1:8000/api';
 
+// const fetchWebsiteRecords = async () => {
+//   try {
+//     const response = await axios.get(`${base_url}/website_records/`);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error fetching website records:', error);
+//     return null;
+//   }
+// };
+
+
 const fetchWebsiteRecords = async () => {
   try {
-    const response = await axios.get(`${base_url}/website_records/`);
-    return response.data;
+    let allWebsiteRecords = [];
+    let hasMore = true;
+    let page = 1;
+
+    while (hasMore) {
+      const response = await axios.get(`${base_url}/website_records/?page=${page}`);
+      allWebsiteRecords = [...allWebsiteRecords, ...response.data.results];
+      hasMore = response.data.next !== null;
+      page += 1;
+    }
+    // console.log(allWebsiteRecords)
+
+    return allWebsiteRecords;
   } catch (error) {
-    console.error('Error fetching website records:', error);
-    return null;
+    console.error('Error fetching all website records:', error);
+    return [];
   }
 };
-
 const SelectWebsite = () => {
   const navigate = useNavigate();
   const [selectedWebsite, setSelectedWebsite] = useState(null);
@@ -22,11 +43,12 @@ const SelectWebsite = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchWebsiteRecords();
+      console.log(data[0]);
       if (data && data.length > 0) {
-        setSelectedWebsite(data.results[0].id);
+        setSelectedWebsite(data[0].id);
       }
 
-      setWebsiteRecords(data.results);
+      setWebsiteRecords(data);
     };
 
     fetchData();
