@@ -5,7 +5,7 @@ import WebsiteRecords from "../WebsiteRecords/WebsiteRecords";
 import websiteRecords from "../WebsiteRecords/WebsiteRecords";
 
 const base_url = 'http://127.0.0.1:8000/api';
-const recordsPerPage = 2;
+const recordsPerPage = 5;
 
 
 const fetchExecutions = async (label='', sort='start_time', page=1, page_size=recordsPerPage) => {
