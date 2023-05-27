@@ -33,7 +33,6 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
 
     const uniqueExecutionsArray = Object.values(uniqueExecutions);
 
-    console.log(uniqueExecutionsArray);
 
     const response = await axios.get(`${base_url}/website_records/`, {
       params: {
@@ -177,10 +176,10 @@ const WebsiteRecords = () => {
       </thead>
       <tbody>
         {websiteRecords.map((websiteRecord) => (
-          <tr key={websiteRecord.id}>
-            <td>{websiteRecord.id}</td>
+          <tr key={websiteRecord.website_record}>
+            <td>{websiteRecord.website_record}</td>
             <td>
-              <a href={`/website_records/${websiteRecord.id}`}>
+              <a href={`/website_records/${websiteRecord.website_record}`}>
                 {websiteRecord.label}
               </a>
             </td>
