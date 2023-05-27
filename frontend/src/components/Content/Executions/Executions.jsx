@@ -90,6 +90,7 @@ const Executions = () => {
   const [selectedValueDialog, setSelectedValueDialog] = useState('none');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+  const [websiteRecords, setWebsiteRecords] = useState({});
 
 
   const fetchAndProcessData = useCallback(async () => {
@@ -119,6 +120,8 @@ const Executions = () => {
   useEffect(() => {
     const setUniqueLabelsFromRecords = async () => {
       const allRecords = await fetchAllWebsiteRecords();
+      const data = allRecords.map(record => ({id: record.id, label: record.label}))
+      setWebsiteRecords(data);
       const labels = new Set(allRecords.map(record => record.label));
       setUniqueLabels([...labels]);
     };
@@ -128,6 +131,7 @@ const Executions = () => {
   useEffect(() => {
     const setUniqueLabelsFromRecords = async () => {
       const allRecords = await fetchAllWebsiteRecords();
+
       const labels = new Set(allRecords.map(record => record.label));
       setUniqueLabels([...labels]);
     };
@@ -193,9 +197,9 @@ const Executions = () => {
               <h3>Create New Execution</h3>
               <select onChange={(e) => setSelectedValueDialog(e.target.value)}>
                 <option value="none">None</option>
-                {records.map((record) => (
-                  <option key={record.id_website_record} value={record.id_website_record}>
-                    {record.id_website_record + ' - ' + record.label}
+                {websiteRecords.map((record) => (
+                  <option key={record.id} value={record.id}>
+                    {record.id + ' - ' + record.label}
                   </option>
                 ))}
               </select>
