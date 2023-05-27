@@ -9,7 +9,7 @@ const recordsPerPage = 2;
 
 
 const fetchExecutions = async (label='', sort='start_time', page=1, page_size=recordsPerPage) => {
-  if(label !== '') page = 1;
+  // if(label !== '') page = 1;
   try {
     const response = await axios.get(`${base_url}/executions/?label=${label}&sort=${sort}&page=${page}&page_size=${page_size}`);
     const data = response.data;
@@ -111,6 +111,10 @@ const Executions = () => {
       console.error('Error creating execution:', error);
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterLabel]);
 
   useEffect(() => {
     const setUniqueLabelsFromRecords = async () => {
