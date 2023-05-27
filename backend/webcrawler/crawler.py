@@ -117,4 +117,14 @@ class Crawler:
 
     def is_valid_link(self, link):
         boundary_regexp = self.website_record.boundary_regexp
-        return re.match(boundary_regexp, link) is not None
+        if re.match(boundary_regexp, link) is not None:
+            try:
+                response = requests.head(link, allow_redirects=True, timeout=5)
+                content_type = response.headers.get('Content-Type', '')
+                if 'text/html' in content_type:
+                    return True
+                else:
+                    return False
+            except (requests.exceptions.RequestException, ValueError):
+                return False
+        return False
