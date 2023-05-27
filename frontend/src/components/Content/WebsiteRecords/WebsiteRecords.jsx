@@ -47,17 +47,25 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
 
     const websiteRecords = response.data.results;
 
-    const combinedArray = websiteRecords.reduce((result, execution) => {
-      const matchingElement = uniqueExecutionsArray.find(element => element.website_record === execution.id);
-      if (matchingElement) {
-        result.push({ ...execution, ...matchingElement });
+    let mergedRecords = websiteRecords.map(websiteRecord => {
+      // Look for a matching execution for this website record.
+      const execution = uniqueExecutionsArray.find(exec => exec.website_record === websiteRecord.id);
+
+      // If a matching execution was found, combine its data with the website record's data.
+      if (execution) {
+        return {
+          ...websiteRecord,
+          execution
+        };
       }
-      return result;
-    }, []);
-    
-    
+
+      // If no matching execution was found, return the website record data as is.
+      return websiteRecord;
+    });
+
     return {
-      results: combinedArray,
+      // results: combinedArray,
+      results: mergedRecords,
       current: currentPage,
       total_pages: Math.ceil(response.data.count / pageSize),
     };
@@ -176,10 +184,10 @@ const WebsiteRecords = () => {
       </thead>
       <tbody>
         {websiteRecords.map((websiteRecord) => (
-          <tr key={websiteRecord.website_record}>
-            <td>{websiteRecord.website_record}</td>
+          <tr key={websiteRecord.id}>
+            <td>{websiteRecord.id}</td>
             <td>
-              <a href={`/website_records/${websiteRecord.website_record}`}>
+              <a href={`/website_records/${websiteRecord.id}`}>
                 {websiteRecord.label}
               </a>
             </td>
@@ -187,9 +195,9 @@ const WebsiteRecords = () => {
             <td>{websiteRecord.periodicity}</td>
             <td>{websiteRecord.tags.join(', ')}</td>
             <td>{
-                new Date(websiteRecord.start_time).toLocaleString()
+                websiteRecord.execution ? new Date(websiteRecord.execution?.start_time).toLocaleString() : "No execution"
             }</td>
-            <td>{websiteRecord.status}</td>
+            <td>{websiteRecord.execution ? websiteRecord.execution?.status: "No execution"}</td>
           </tr>
         ))}
       </tbody>
