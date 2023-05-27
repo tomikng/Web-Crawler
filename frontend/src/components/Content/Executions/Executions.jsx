@@ -1,14 +1,22 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './Execution.css';
 import axios from 'axios';
+import WebsiteRecords from "../WebsiteRecords/WebsiteRecords";
+import websiteRecords from "../WebsiteRecords/WebsiteRecords";
 
 const base_url = 'http://127.0.0.1:8000/api';
+const recordsPerPage = 5;
 
-const fetchExecutions = async () => {
+
+const fetchExecutions = async (label='', sort='start_time', page=1, page_size=recordsPerPage) => {
+  // if(label !== '') page = 1;
   try {
-    const response = await axios.get(`${base_url}/executions/`);
+    const response = await axios.get(`${base_url}/executions/?label=${label}&sort=${sort}&page=${page}&page_size=${page_size}`);
     const data = response.data;
-    return data;
+    return {
+      count: data.count,
+      results: data.results
+    };
   } catch (error) {
     console.error('Error fetching data:', error);
     return null;
@@ -25,22 +33,13 @@ const fetchWebsiteRecord = async (id) => {
   }
 };
 
-const fetchWebsiteRecords = async () => {
-  try {
-    const response = await axios.get(`${base_url}/website_records/`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching website records:', error);
-    return null;
-  }
-};
-
 const processWebsiteRecords = async (records) => {
   const processedRecords = [];
   for (const record of records) {
     const websiteRecord = await fetchWebsiteRecord(record.website_record);
     if (websiteRecord) {
-      const { label } = websiteRecord;
+      const { label, id } = websiteRecord;
+      const id_website_record = id;
       const start_time = record.start_time
         ? new Date(record.start_time).toLocaleString()
         : 'None';
@@ -49,6 +48,7 @@ const processWebsiteRecords = async (records) => {
         : 'None';
       processedRecords.push({
         id: record.id,
+        id_website_record,
         label,
         status: record.status,
         start_time,
@@ -60,22 +60,90 @@ const processWebsiteRecords = async (records) => {
   return processedRecords;
 };
 
+const fetchAllWebsiteRecords = async () => {
+  try {
+    let allWebsiteRecords = [];
+    let hasMore = true;
+    let page = 1;
+
+    while (hasMore) {
+      const response = await axios.get(`${base_url}/website_records/?page=${page}`);
+      allWebsiteRecords = [...allWebsiteRecords, ...response.data.results];
+      hasMore = response.data.next !== null;
+      page += 1;
+    }
+
+    return allWebsiteRecords;
+  } catch (error) {
+    console.error('Error fetching all website records:', error);
+    return [];
+  }
+};
+
 const Executions = () => {
   const [records, setRecords] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [filterLabel, setFilterLabel] = useState('');
   const [uniqueLabels, setUniqueLabels] = useState([]);
-
   const [sortedBy, setSortedBy] = useState('start_time');
-
-  const [websiteRecords, setWebsiteRecords] = useState([]);
   const [selectedValueDialog, setSelectedValueDialog] = useState('none');
-
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 10;
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [websiteRecords, setWebsiteRecords] = useState({});
 
-  const filterRecords = useCallback(() => {
+
+  const fetchAndProcessData = useCallback(async () => {
+    const fetchedData = await fetchExecutions(filterLabel, sortedBy, currentPage);
+    if (fetchedData) {
+      setTotalRecords(fetchedData.count);
+      const processedData = await processWebsiteRecords(fetchedData.results);
+      setRecords(processedData);
+    }
+  }, [filterLabel, sortedBy, currentPage]);
+
+  const createNewExecution = async () => {
+    const id = selectedValueDialog;
+    try {
+      await axios.post(`${base_url}/executions/create/${id}/`);
+      setIsDialogOpen(false);
+      fetchAndProcessData();
+    } catch (error) {
+      console.error('Error creating execution:', error);
+    }
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterLabel]);
+
+  useEffect(() => {
+    const setUniqueLabelsFromRecords = async () => {
+      const allRecords = await fetchAllWebsiteRecords();
+      const data = allRecords.map(record => ({id: record.id, label: record.label}))
+      setWebsiteRecords(data);
+      const labels = new Set(allRecords.map(record => record.label));
+      setUniqueLabels([...labels]);
+    };
+    setUniqueLabelsFromRecords();
+  }, []);
+
+  useEffect(() => {
+    const setUniqueLabelsFromRecords = async () => {
+      const allRecords = await fetchAllWebsiteRecords();
+
+      const labels = new Set(allRecords.map(record => record.label));
+      setUniqueLabels([...labels]);
+    };
+    setUniqueLabelsFromRecords();
+  }, []);
+
+
+  useEffect(() => {
+    fetchAndProcessData();
+  }, [fetchAndProcessData, filterLabel]);
+
+  useEffect(() => {
     if (filterLabel) {
       const filtered = records.filter((record) => record.label === filterLabel);
       setFilteredRecords(filtered);
@@ -84,37 +152,6 @@ const Executions = () => {
     }
   }, [filterLabel, records]);
 
-  const createNewExecution = async () => {
-    const id = selectedValueDialog;
-    try {
-      await axios.post(`${base_url}/executions/create/${id}/`);
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error('Error creating execution:', error);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const executionData = await fetchExecutions();
-      if (executionData) {
-        const processedData = await processWebsiteRecords(executionData);
-        setRecords(processedData);
-
-        const website_records = await fetchWebsiteRecords();
-        setWebsiteRecords(website_records);
-
-        const labels = [...new Set(processedData.map((record) => record.label))];
-        setUniqueLabels(labels);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    filterRecords();
-  }, [records, filterLabel, filterRecords]);
 
   const sortIcon = (field) => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
@@ -125,24 +162,13 @@ const Executions = () => {
   };
 
   // Calculate pagination values
-  const totalRecords = filteredRecords.length;
   const totalPages = Math.ceil(totalRecords / recordsPerPage);
-  const startIndex = (currentPage - 1) * recordsPerPage;
-  const endIndex = Math.min(startIndex + recordsPerPage - 1, totalRecords - 1);
-  const currentRecords = filteredRecords.slice(startIndex, endIndex + 1);
+
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  const sortedRecords = [...currentRecords].sort((a, b) => {
-    if (sortedBy === 'start_time') {
-      return new Date(a.start_time) - new Date(b.start_time);
-    } else if (sortedBy === '-start_time') {
-      return new Date(b.start_time) - new Date(a.start_time);
-    }
-    return 0;
-  });
 
   return (
     <div>
@@ -171,9 +197,9 @@ const Executions = () => {
               <h3>Create New Execution</h3>
               <select onChange={(e) => setSelectedValueDialog(e.target.value)}>
                 <option value="none">None</option>
-                {websiteRecords.map((websiteRecord) => (
-                  <option key={websiteRecord.id} value={websiteRecord.id}>
-                    {websiteRecord.id + ' - ' + websiteRecord.label}
+                {websiteRecords.map((record) => (
+                  <option key={record.id} value={record.id}>
+                    {record.id + ' - ' + record.label}
                   </option>
                 ))}
               </select>
@@ -200,7 +226,7 @@ const Executions = () => {
             </tr>
           </thead>
           <tbody>
-            {sortedRecords.map((record) => (
+            {records.map((record) => (
               <tr key={record.id}>
                 <td>{record.id}</td>
                 <td>
