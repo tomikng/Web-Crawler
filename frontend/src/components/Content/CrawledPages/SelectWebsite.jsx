@@ -4,17 +4,10 @@ import axios from 'axios';
 
 const base_url = 'http://127.0.0.1:8000/api';
 
-// const fetchWebsiteRecords = async () => {
-//   try {
-//     const response = await axios.get(`${base_url}/website_records/`);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error fetching website records:', error);
-//     return null;
-//   }
-// };
-
-
+/**
+ * Fetches all website records from the API.
+ * @returns {Promise<Array>} - Array of website records.
+ */
 const fetchWebsiteRecords = async () => {
   try {
     let allWebsiteRecords = [];
@@ -27,7 +20,6 @@ const fetchWebsiteRecords = async () => {
       hasMore = response.data.next !== null;
       page += 1;
     }
-    // console.log(allWebsiteRecords)
 
     return allWebsiteRecords;
   } catch (error) {
@@ -35,6 +27,7 @@ const fetchWebsiteRecords = async () => {
     return [];
   }
 };
+
 const SelectWebsite = () => {
   const navigate = useNavigate();
   const [selectedWebsite, setSelectedWebsite] = useState(null);
@@ -43,7 +36,6 @@ const SelectWebsite = () => {
   useEffect(() => {
     const fetchData = async () => {
       const data = await fetchWebsiteRecords();
-      console.log(data[0]);
       if (data && data.length > 0) {
         setSelectedWebsite(data[0].id);
       }
@@ -54,9 +46,12 @@ const SelectWebsite = () => {
     fetchData();
   }, []);
 
+  /**
+   * Event handler for form submission.
+   * @param {object} event - Form submit event.
+   */
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(selectedWebsite)
     navigate(`/crawledPages/${selectedWebsite}`);
   };
 

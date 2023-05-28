@@ -21,7 +21,12 @@ const nodeTypes = {
   customNode: CustomNodeComponent,
 };
 
-// Helper function to fetch data
+/**
+ * Fetches data for a given website.
+ *
+ * @param {string} website - The website to fetch data for.
+ * @returns {Promise<object>} - The fetched data.
+ */
 const fetchData = async (website) => {
   const query = `
     query {
@@ -48,7 +53,12 @@ const fetchData = async (website) => {
   return response.data.data;
 };
 
-// Helper functions for constructing nodes and edges for different view modes
+/**
+ * Constructs the website view for the crawled pages.
+ *
+ * @param {Array} filteredNodesData - The filtered nodes data.
+ * @returns {Object} - The constructed nodes, edges, and hashmap.
+ */
 const constructWebsiteView = (filteredNodesData) => {
   let fetchedEdges = [];
   let fetchedNodes = [];
@@ -92,6 +102,13 @@ const constructWebsiteView = (filteredNodesData) => {
   return { fetchedNodes, fetchedEdges, newHashMap };
 };
 
+
+/**
+ * Constructs the domain view for the crawled pages.
+ *
+ * @param {Array} filteredNodesData - The filtered nodes data.
+ * @returns {Object} - The constructed nodes and edges.
+ */
 const constructDomainView = (filteredNodesData) => {
   let fetchedEdges = [];
   let fetchedNodes = [];
@@ -187,53 +204,72 @@ const defaultNodeWidth = 150;
 const defaultNodeHeight = 50;
 
 
+/**
+ * Represents the component that renders the crawled pages graph.
+ */
 const CrawledPages = () => {
-
+  // Extracting the 'website' parameter from the URL
   const { website } = useParams();
+
+  // State variables for graph nodes and edges
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  // State variables for view mode, hashmap, and mode
   const [viewMode, setViewMode] = useState("domain");
   const [hashMap, setHashMap] = useState(new Map());
   const [mode, setMode] = useState("live");
 
+  /**
+   * Event handler for toggling the view mode between 'website' and 'domain'.
+   */
   const handleViewModeChange = useCallback(() => {
     setViewMode(viewMode === "website" ? "domain" : "website");
   }, [viewMode]);
 
+  /**
+   * Event handler for toggling the mode between 'live' and 'static'.
+   */
   const handleModeChange = useCallback(() => {
     setMode(mode === "static" ? "live" : "static");
   }, [mode]);
 
-
+  // Effect hook for graph layout
   useEffect(() => {
+    // Create a new dagre graph
     const g = new dagre.graphlib.Graph();
     g.setDefaultEdgeLabel(() => ({}));
     g.setGraph({
-      rankdir: 'LR'  // set graph direction to top-bottom
+      rankdir: 'LR' // set graph direction to top-bottom
     });
 
     const scaleFactor = 2;
 
+    // Set the nodes' dimensions in the graph
     nodes.forEach((node) => {
-      g.setNode(node.id, { 
+      g.setNode(node.id, {
         width: (node.__rf?.width || defaultNodeWidth) * scaleFactor,
-        height:(node.__rf?.height || defaultNodeHeight) * scaleFactor
+        height: (node.__rf?.height || defaultNodeHeight) * scaleFactor
       });
     });
 
+    // Set the edges in the graph
     edges.forEach((edge) => {
       g.setEdge(edge.source, edge.target);
     });
 
+    // Perform the graph layout using dagre
     dagre.layout(g);
 
+    // Update the node positions based on the layout
     g.nodes().forEach((nodeId) => {
       const nodeInfo = g.node(nodeId);
       const node = nodes.find((el) => el.id === nodeId);
-      if (node) { // Ensure node is not undefined
+      if (node) {
+        // Ensure node is not undefined
         node.position = {
           x: nodeInfo?.x - (node?.__rf?.width || defaultNodeWidth) / 2,
-          y: nodeInfo?.y - (node?.__rf?.height || defaultNodeHeight) / 2,
+          y: nodeInfo?.y - (node?.__rf?.height || defaultNodeHeight) / 2
         };
       } else {
         // console.warn(`Node with id ${nodeId} not found in nodes array`);
@@ -243,42 +279,46 @@ const CrawledPages = () => {
     setNodes([...nodes]);
   }, [nodes, edges, setNodes]);
 
-useEffect(() => {
-  // Fetch the data first, and then set state
-  const loadGraph = async () => {
-    try {
-      const data = await fetchData(website);
-      const filteredNodesData = data.nodes;
+  // Effect hook for fetching and updating the graph data
+  useEffect(() => {
+    // Fetch the data first, and then set state
+    const loadGraph = async () => {
+      try {
+        const data = await fetchData(website);
+        const filteredNodesData = data.nodes;
 
-      if (viewMode === "website") {
-        const { fetchedNodes, fetchedEdges, newHashMap } = constructWebsiteView(filteredNodesData);
-        setNodes(fetchedNodes);
-        setEdges(fetchedEdges);
-        setHashMap(newHashMap);
-      } else if (viewMode === "domain") {
-        const { fetchedNodes, fetchedEdges } = constructDomainView(filteredNodesData);
-        setNodes(fetchedNodes);
-        setEdges(fetchedEdges);
+        if (viewMode === "website") {
+          const { fetchedNodes, fetchedEdges, newHashMap } = constructWebsiteView(filteredNodesData);
+          setNodes(fetchedNodes);
+          setEdges(fetchedEdges);
+          setHashMap(newHashMap);
+        } else if (viewMode === "domain") {
+          const { fetchedNodes, fetchedEdges } = constructDomainView(filteredNodesData);
+          setNodes(fetchedNodes);
+          setEdges(fetchedEdges);
+        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
+    };
+
+    // Update immediately
+    loadGraph();
+
+    let intervalId;
+    if (mode === "live") {
+      // Update periodically if in live mode
+      intervalId = setInterval(loadGraph, 2000); // Adjust this to the desired refresh rate
     }
-  };
 
-  // Update immediately
-  loadGraph();
+    // Clear interval when mode or website changes
+    return () => clearInterval(intervalId);
+  }, [website, mode, viewMode]);
 
-  let intervalId;
-  if (mode === "live") {
-    // Update periodically if in live mode
-    intervalId = setInterval(loadGraph, 2000); // Adjust this to the desired refresh rate
-  }
-
-  // Clear interval when mode or website changes
-  return () => clearInterval(intervalId);
-  }, [website, mode, viewMode]); // Added viewMode to dependencies
-
-  // const onConnect = (params) => setEdges((eds) => [...eds, params]);
+  /**
+   * Event handler for connecting nodes in the graph.
+   * @param {object} params - Connection parameters (source, target, etc.).
+   */
   const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   return (
