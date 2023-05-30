@@ -3,6 +3,11 @@ import { Handle } from 'reactflow';
 import './CustomNodeComponent.css';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Custom component for rendering a node in the graph.
+ * @param {object} data - Data object for the node containing information like url, title, view mode, etc.
+ * @returns {JSX.Element} - CustomNodeComponent JSX element.
+ */
 const CustomNodeComponent = ({ data }) => {
   const navigate = useNavigate();
 
@@ -21,7 +26,9 @@ const CustomNodeComponent = ({ data }) => {
   const handleClick = () => {
     console.log(data.id);
     // Perform any desired operations with the node information
-    navigate('/nodeDetail/' + data.id, { state: { data, nodeStyle } });
+    if(data.viewMode === "website") {
+      navigate('/nodeDetail/' + data.id, { state: { data, nodeStyle } });
+    }
   };
 
   return (

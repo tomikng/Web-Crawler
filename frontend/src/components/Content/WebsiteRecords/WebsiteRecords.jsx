@@ -5,6 +5,17 @@ import axios from 'axios';
 const base_url = 'http://127.0.0.1:8000/api';
 const recordsPerPage = 5;
 
+/**
+ * Fetches website records with associated execution data from the API.
+ * @param {number} currentPage - The current page number.
+ * @param {number} pageSize - The number of records per page.
+ * @param {string} sortBy - The field to sort the records by.
+ * @param {string} filterLabel - The label to filter the records by.
+ * @param {string} filterUrl - The URL to filter the records by.
+ * @param {Array<string>} filterTags - The tags to filter the records by.
+ * @returns {Promise<Object|null>} A Promise that resolves to an object containing the fetched website records and associated execution data,
+ * along with the current page number and total number of pages, or null if an error occurs.
+ */
 const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, sortBy = 'url', filterLabel = '', filterUrl = '', filterTags = []) => {
   try {
 
@@ -75,6 +86,11 @@ const fetchWebsiteRecords = async (currentPage = 1, pageSize = recordsPerPage, s
   }
 };
 
+
+/**
+ * Component for displaying and filtering website records.
+ * @returns {JSX.Element} The rendered WebsiteRecords component.
+ */
 const WebsiteRecords = () => {
   const [websiteRecords, setWebsiteRecords] = useState([]);
   const [sortedBy, setSortedBy] = useState('url');
@@ -84,7 +100,13 @@ const WebsiteRecords = () => {
   const [filterUrl, setFilterUrl] = useState('');
   const [filterTags, setFilterTags] = useState([]);
 
+   // Fetch website records on component mount and whenever the sorting, pagination, or filter settings change
   useEffect(() => {
+     /**
+     * Fetches website records based on the current sorting, pagination, and filter settings.
+     * Updates the state with the fetched data.
+     * @returns {Promise<void>} A Promise that resolves when the data is fetched and state is updated.
+     */
     const fetchData = async () => {
       const websiteRecordsData = await fetchWebsiteRecords(
         currentPage, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
@@ -99,10 +121,20 @@ const WebsiteRecords = () => {
     fetchData();
   }, [sortedBy, currentPage, filterLabel, filterUrl, filterTags]);
 
+   /**
+   * Renders an icon indicating the sorting direction for a field.
+   * @param {string} field - The field to check the sorting for.
+   * @returns {JSX.Element} The icon element indicating the sorting direction.
+   */
   const sortIcon = (field) => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
   };
 
+  /**
+   * Handles the page change event and fetches the corresponding website records.
+   * @param {number} page - The page number to navigate to.
+   * @returns {Promise<void>} A Promise that resolves when the data is fetched and state is updated.
+   */
   const handlePageChange = async (page) => {
     setCurrentPage(page);
     const websiteRecordsData = await fetchWebsiteRecords(
@@ -113,6 +145,12 @@ const WebsiteRecords = () => {
     }
   };
 
+
+  /**
+   * Handles the filter label change event and fetches the filtered website records.
+   * @param {Object} event - The event object representing the change event.
+   * @returns {Promise<void>} A Promise that resolves when the data is fetched and state is updated.
+   */
   const handleFilterLabelChange = async (event) => {
     setFilterLabel(event.target.value);
     const websiteRecordsData = await fetchWebsiteRecords(
@@ -123,6 +161,12 @@ const WebsiteRecords = () => {
     }
   };
 
+
+  /**
+   * Handles the filter URL change event and fetches the filtered website records.
+   * @param {Object} event - The event object representing the change event.
+   * @returns {Promise<void>} A Promise that resolves when the data is fetched and state is updated.
+   */
   const handleFilterUrlChange = async (event) => {
     setFilterUrl(event.target.value);
     const websiteRecordsData = await fetchWebsiteRecords(
@@ -133,6 +177,12 @@ const WebsiteRecords = () => {
     }
   };
 
+
+   /**
+   * Handles the filter tags change event and fetches the filtered website records.
+   * @param {Object} event - The event object representing the change event.
+   * @returns {Promise<void>} A Promise that resolves when the data is fetched and state is updated.
+   */
   const handleFilterTagsChange = async (event) => {
     const inputValue = event.target.value.trim();
     

@@ -2,6 +2,11 @@ import React from 'react';
 import './Navbar.css';
 import { Link, useLocation } from 'react-router-dom';
 
+
+/**
+ * Component for rendering the navigation bar.
+ * @returns {JSX.Element} The rendered Navbar component.
+ */
 const Navbar = () => {
   const location = useLocation();
 

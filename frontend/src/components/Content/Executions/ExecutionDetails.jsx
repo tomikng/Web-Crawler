@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import './ExecutionDetails.css'; 
+import './ExecutionDetails.css';
 
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * Component for displaying execution details.
+ */
 const ExecutionDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -26,13 +29,15 @@ const ExecutionDetails = () => {
     fetchExecutionDetails();
   }, [id]);
 
+  /**
+   * Handles the deletion of an execution.
+   */
   const handleDelete = async () => {
     try {
       await axios.delete(`${BASE_URL}/delete/${id}/`);
       // Perform any additional actions after successful deletion
       alert('Execution was deleted successfully');
       navigate('/executions');
-
     } catch (error) {
       console.error('Error deleting execution:', error);
     }

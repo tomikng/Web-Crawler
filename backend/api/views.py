@@ -20,7 +20,26 @@ class StandardResultsSetPagination(PageNumberPagination):
 @api_view(['POST'])
 def create_website_record(request):
     """
-    Create a website record. And straightaway the website will be crawled if is active
+    Create a website record. And straightaway the website will be crawled if is active.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+    responses:
+        200:
+            description: A successful response with the created website record.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            website_record:
+                                $ref: '#/components/schemas/WebsiteRecord'
     """
     serializer = WebsiteRecordSerializer(data=request.data)
     if serializer.is_valid():
@@ -33,7 +52,31 @@ def create_website_record(request):
 @api_view(['PUT'])
 def update_website_record(request, identifier):
     """
-    Update a website record. And straightaway the website will be crawled if is active
+    Update a website record. And straightaway the website will be crawled if is active.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: identifier
+          description: The identifier of the website record to update.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response with the updated website record.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            website_record:
+                                $ref: '#/components/schemas/WebsiteRecord'
     """
     website_record = get_object_or_404(WebsiteRecord, pk=identifier)
     serializer = WebsiteRecordSerializer(website_record, data=request.data)
@@ -48,6 +91,28 @@ def update_website_record(request, identifier):
 def delete_website_record(request, identifier):
     """
     Delete a website record.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: identifier
+          description: The identifier of the website record to delete.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response indicating the website record was deleted.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
     """
     website_record = get_object_or_404(WebsiteRecord, pk=identifier)
     website_record.delete()
@@ -57,8 +122,7 @@ def delete_website_record(request, identifier):
 @swagger_auto_schema(
     method='GET',
     responses={200: WebsiteRecordSerializer(many=True)},
-    manual_parameters=
-    [
+    manual_parameters=[
         openapi.Parameter('url', openapi.IN_QUERY, description="URL of the website to filter",
                           type=openapi.TYPE_STRING),
         openapi.Parameter('label', openapi.IN_QUERY, description="Label of the website to filter",
@@ -78,8 +142,31 @@ def delete_website_record(request, identifier):
 def get_website_records(request):
     """
     Get all website records.
-    Filter by url, label, and tags with /api/website_records?url=<url>&label=<label>&tags=<tags>
-    Sort by url or last_crawled using /api/website_records?sort=url|last_crawled
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+    responses:
+        200:
+            description: A successful response with a list of website records.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            count:
+                                type: integer
+                            next:
+                                type: string
+                            previous:
+                                type: string
+                            results:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/WebsiteRecord'
     """
     url = request.GET.get('url')
     label = request.GET.get('label')
@@ -110,8 +197,7 @@ def get_website_records(request):
 @swagger_auto_schema(
     method='GET',
     responses={200: ExecutionSerializer(many=True)},
-    manual_parameters=
-    [
+    manual_parameters=[
         openapi.Parameter('label', openapi.IN_QUERY, description="Label of the website to filter",
                           type=openapi.TYPE_STRING),
         openapi.Parameter('sort', openapi.IN_QUERY,
@@ -127,8 +213,31 @@ def get_website_records(request):
 def get_executions(request):
     """
     Get all executions.
-    Filter by label with /api/executions?label=<label>
-    Sort by start_time using /api/executions?sort=start_time|-start_time
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+    responses:
+        200:
+            description: A successful response with a list of executions.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            count:
+                                type: integer
+                            next:
+                                type: string
+                            previous:
+                                type: string
+                            results:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Execution'
     """
     label = request.GET.get('label')
     sort = request.GET.get('sort')
@@ -153,6 +262,25 @@ def get_executions(request):
 def get_website_record(request, identifier):
     """
     Get a specific website record.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: identifier
+          description: The identifier of the website record to retrieve.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response with the requested website record.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/WebsiteRecord'
     """
     website_record = get_object_or_404(WebsiteRecord, pk=identifier)
     serializer = WebsiteRecordSerializer(website_record)
@@ -164,6 +292,25 @@ def get_website_record(request, identifier):
 def get_execution(request, identifier):
     """
     Get a specific execution.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: identifier
+          description: The identifier of the execution to retrieve.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response with the requested execution.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Execution'
     """
     execution = get_object_or_404(Execution, pk=identifier)
     serializer = ExecutionSerializer(execution)
@@ -175,10 +322,30 @@ def get_execution(request, identifier):
 def create_execution(request, website_id):
     """
     Create an execution for the specified website.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: website_id
+          description: The identifier of the website to create the execution for.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response indicating the execution was created.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
     """
     website = get_object_or_404(WebsiteRecord, pk=website_id)
-    # execution = Execution.objects.create(website_record=website)
-    # serializer = ExecutionSerializer(execution)
     from webcrawler.tasks import crawl_website
     crawl_website.delay(website.id)
     return Response({'success': True})
@@ -189,6 +356,30 @@ def create_execution(request, website_id):
 def update_execution(request, identifier):
     """
     Update an execution.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: identifier
+          description: The identifier of the execution to update.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response with the updated execution.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                            execution:
+                                $ref: '#/components/schemas/Execution'
     """
     execution = get_object_or_404(Execution, pk=identifier)
     serializer = ExecutionSerializer(execution, data=request.data)
@@ -203,6 +394,28 @@ def update_execution(request, identifier):
 def delete_execution(request, identifier):
     """
     Delete an execution.
+    ---
+    parameters:
+        - name: request
+          description: The HTTP request object.
+          required: true
+          in: query
+          type: object
+        - name: identifier
+          description: The identifier of the execution to delete.
+          required: true
+          in: path
+          type: integer
+    responses:
+        200:
+            description: A successful response indicating the execution was deleted.
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
     """
     execution = get_object_or_404(Execution, pk=identifier)
     execution.delete()

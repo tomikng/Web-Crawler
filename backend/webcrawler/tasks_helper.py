@@ -3,6 +3,12 @@ from django.apps import apps
 
 
 def create_periodic_crawl_task(website_record):
+    """
+    Create or update a periodic task for crawling a website.
+    
+    Args:
+        website_record: The WebsiteRecord object representing the website to crawl.
+    """
     period = {
         'minute': IntervalSchedule.MINUTES,
         'hour': IntervalSchedule.HOURS,

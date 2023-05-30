@@ -1,15 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import './Execution.css';
 import axios from 'axios';
-import WebsiteRecords from "../WebsiteRecords/WebsiteRecords";
-import websiteRecords from "../WebsiteRecords/WebsiteRecords";
 
 const base_url = 'http://127.0.0.1:8000/api';
 const recordsPerPage = 5;
 
-
+/**
+ * Fetches executions from the API.
+ * @param {string} label - The label to filter the executions by.
+ * @param {string} sort - The field to sort the executions by.
+ * @param {number} page - The page number.
+ * @param {number} page_size - The number of records per page.
+ * @returns {Promise<{ count: number, results: any[] }>} The fetched executions.
+ */
 const fetchExecutions = async (label='', sort='start_time', page=1, page_size=recordsPerPage) => {
-  // if(label !== '') page = 1;
   try {
     const response = await axios.get(`${base_url}/executions/?label=${label}&sort=${sort}&page=${page}&page_size=${page_size}`);
     const data = response.data;
@@ -23,6 +27,11 @@ const fetchExecutions = async (label='', sort='start_time', page=1, page_size=re
   }
 };
 
+/**
+ * Fetches a website record from the API.
+ * @param {number} id - The ID of the website record.
+ * @returns {Promise<any>} The fetched website record.
+ */
 const fetchWebsiteRecord = async (id) => {
   try {
     const response = await axios.get(`${base_url}/website_records/${id}/`);
@@ -33,6 +42,11 @@ const fetchWebsiteRecord = async (id) => {
   }
 };
 
+/**
+ * Processes the website records associated with the executions.
+ * @param {any[]} records - The execution records.
+ * @returns {Promise<any[]>} The processed execution records.
+ */
 const processWebsiteRecords = async (records) => {
   const processedRecords = [];
   for (const record of records) {
@@ -60,6 +74,10 @@ const processWebsiteRecords = async (records) => {
   return processedRecords;
 };
 
+/**
+ * Fetches all website records from the API.
+ * @returns {Promise<any[]>} The fetched website records.
+ */
 const fetchAllWebsiteRecords = async () => {
   try {
     let allWebsiteRecords = [];
@@ -80,6 +98,9 @@ const fetchAllWebsiteRecords = async () => {
   }
 };
 
+/**
+ * Component for displaying and managing executions.
+ */
 const Executions = () => {
   const [records, setRecords] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -92,7 +113,9 @@ const Executions = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [websiteRecords, setWebsiteRecords] = useState({});
 
-
+  /**
+   * Fetches and processes the execution data.
+   */
   const fetchAndProcessData = useCallback(async () => {
     const fetchedData = await fetchExecutions(filterLabel, sortedBy, currentPage);
     if (fetchedData) {
@@ -102,6 +125,9 @@ const Executions = () => {
     }
   }, [filterLabel, sortedBy, currentPage]);
 
+  /**
+   * Creates a new execution.
+   */
   const createNewExecution = async () => {
     const id = selectedValueDialog;
     try {
@@ -153,22 +179,29 @@ const Executions = () => {
   }, [filterLabel, records]);
 
 
+  /**
+   * Renders the sort icon based on the sortedBy field.
+   * @param {string} field - The field to be sorted.
+   * @returns {JSX.Element} The sort icon.
+   */
   const sortIcon = (field) => {
     return sortedBy === field ? <span>&#x25BC;</span> : <span>&#x25B2;</span>;
   };
 
+  /**
+   * Handles the click event for creating a new execution.
+   */
   const handleNewExecutionClick = () => {
     setIsDialogOpen(true);
   };
 
-  // Calculate pagination values
-  const totalPages = Math.ceil(totalRecords / recordsPerPage);
-
-
+  /**
+   * Handles the page change event.
+   * @param {number} page - The new page number.
+   */
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
-
 
   return (
     <div>
