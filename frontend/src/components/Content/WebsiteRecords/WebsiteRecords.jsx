@@ -136,13 +136,17 @@ const WebsiteRecords = () => {
    * @returns {Promise<void>} A Promise that resolves when the data is fetched and state is updated.
    */
   const handlePageChange = async (page) => {
-    setCurrentPage(page);
-    const websiteRecordsData = await fetchWebsiteRecords(
-      page, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
-    );
-    if (websiteRecordsData) {
-      setWebsiteRecords(websiteRecordsData.results);
+
+    if(currentPage <= totalPages){
+        setCurrentPage(page);
+        const websiteRecordsData = await fetchWebsiteRecords(
+          page, recordsPerPage, sortedBy, filterLabel, filterUrl, filterTags
+        );
+        if (websiteRecordsData) {
+          setWebsiteRecords(websiteRecordsData.results);
+        }
     }
+   
   };
 
 

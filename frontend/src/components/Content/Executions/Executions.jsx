@@ -195,12 +195,20 @@ const Executions = () => {
     setIsDialogOpen(true);
   };
 
+    // Calculate pagination values
+    const totalPages = Math.ceil(totalRecords / recordsPerPage);
+
   /**
    * Handles the page change event.
    * @param {number} page - The new page number.
    */
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+
+    if(currentPage <= totalPages){
+        setCurrentPage(page);
+    }
+
+    // setCurrentPage(page);
   };
 
   return (
