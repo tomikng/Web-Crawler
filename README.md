@@ -4,8 +4,7 @@
 
 ## Instalation
 ### System requirements
-- Python 3.8 or newer
-- optional - Virtual enviroment
+- Python 3.8
 - Docker
 - [Redis](https://redis.io/docs/getting-started/installation/install-redis-on-windows/)
   
